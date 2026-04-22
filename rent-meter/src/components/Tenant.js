@@ -1,77 +1,181 @@
+// tenant.jsx
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 
-import React from 'react';
+const Tenant = () => {
+  const [landlords, setLandlords] = useState([]);
+  const [apartments, setApartments] = useState([]);
+  const [loadingApartments, setLoadingApartments] = useState(false);
 
-// עיצוב inline מהיר
-const styles = {
-  container: {
-    padding: '20px',
-    maxWidth: '500px',
-    margin: '0 auto',
-    fontFamily: 'sans-serif',
-    direction: 'rtl', // תמיכה בעברית
-    textAlign: 'center',
-  },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: '12px',
-    padding: '20px',
-    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-    marginBottom: '20px',
-  },
-  title: {
-    fontSize: '24px',
-    color: '#333',
-    marginBottom: '10px',
-  },
-  details: {
-    fontSize: '16px',
-    color: '#666',
-    lineHeight: '1.6',
-    marginBottom: '20px',
-  },
-  statusBad: {
-    color: '#e74c3c', // אדום ל"לא שולם"
-    fontWeight: 'bold',
-  },
-  uploadButton: {
-    backgroundColor: '#3f51b5', // כתום צומי
-    color: 'white',
-    border: 'none',
-    padding: '15px 30px',
-    fontSize: '18px',
-    borderRadius: '30px',
-    cursor: 'pointer',
-    fontWeight: 'bold',
-    width: '100%',
-    boxShadow: '0 4px 10px rgba(255,152,0,0.3)',
-    transition: 'transform 0.1s',
-  }
-};
+  useEffect(() => {
+    fetchLandlords();
+  }, []);
 
-export default function Tenant({ setScreen }) {
-  // נתונים סטטיים ל-MVP
-  const tenantName = "דני כהן";
-  const address = "רחוב הרצל 10, דירה 4, תל אביב";
-  const status = "לא שולם (חודש אפריל)";
+  const fetchLandlords = async () => {
+    try {
+      const res = await axios.get("http://localhost:8080/api/landlords");
+      setLandlords(res.data);
+    } catch (err) {
+      console.error("שגיאה בטעינת משכירים", err);
+    }
+  };
+
+  const fetchApartments = async (landlordId) => {
+    if (!landlordId) return;
+    setLoadingApartments(true);
+
+    try {
+      const res = await axios.get(
+        `http://localhost:8080/api/apartments?landlordId=${landlordId}`
+      );
+      setApartments(res.data);
+    } catch (err) {
+      console.error("שגיאה בטעינת דירות", err);
+    } finally {
+      setLoadingApartments(false);
+    }
+  };
+
+  const formik = useFormik({
+    initialValues: {
+      firstName: "",
+      lastName: "",
+      phone: "",
+      email: "",
+      landlordId: "",
+      apartmentId: "",
+      username: "",
+      password: "",
+    },
+    validationSchema: Yup.object({
+      firstName: Yup.string().required("חובה"),
+      lastName: Yup.string().required("חובה"),
+      phone: Yup.string().required("חובה"),
+      email: Yup.string()
+        .email("מייל לא תקין")
+        .required("חובה"),
+      landlordId: Yup.string().required("בחר משכיר"),
+      apartmentId: Yup.string().required("בחר דירה"),
+      username: Yup.string()
+        .matches(
+          /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/,
+          "לפחות 8 תווים עם אותיות ומספרים"
+        )
+        .required("חובה"),
+      password: Yup.string()
+        .matches(
+          /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/,
+          "לפחות 8 תווים עם אותיות ומספרים"
+        )
+        .required("חובה"),
+    }),
+    onSubmit: async (values) => {
+      try {
+        await axios.post("http://localhost:8080/api/tenants", values);
+        alert("השוכר נשמר בהצלחה ✔️");
+      } catch (err) {
+        console.error(err);
+        alert("שגיאה בשמירה ❗");
+      }
+    },
+  });
 
   return (
-    <div style={styles.container}>
-      <h1 style={styles.title}>שלום, {tenantName} </h1>
-      
-      <div style={styles.card}>
-        <h3>פרטי דירה:</h3>
-        <p style={styles.details}>{address}</p>
-        
-        <h3>סטטוס תשלום:</h3>
-        <p style={{...styles.details, ...styles.statusBad}}>{status}</p>
-      </div>
+    <div style={{ maxWidth: "400px", margin: "auto" }}>
+      <h2>יצירת שוכר</h2>
 
-      <button 
-        style={styles.uploadButton}
-        onClick={() => setScreen("upload")} // מעבר למסך העלאה
-      >
-        העלאת קריאת מונה חדשה
-      </button>
+      <form onSubmit={formik.handleSubmit}>
+        <input
+          name="firstName"
+          placeholder="שם"
+          onChange={formik.handleChange}
+          value={formik.values.firstName}
+        />
+        <div>{formik.errors.firstName}</div>
+
+        <input
+          name="lastName"
+          placeholder="שם משפחה"
+          onChange={formik.handleChange}
+          value={formik.values.lastName}
+        />
+        <div>{formik.errors.lastName}</div>
+
+        <input
+          name="phone"
+          placeholder="טלפון"
+          onChange={formik.handleChange}
+          value={formik.values.phone}
+        />
+        <div>{formik.errors.phone}</div>
+
+        <input
+          name="email"
+          placeholder="מייל"
+          onChange={formik.handleChange}
+          value={formik.values.email}
+        />
+        <div>{formik.errors.email}</div>
+
+        {/* משכירים */}
+        <select
+          name="landlordId"
+          value={formik.values.landlordId}
+          onChange={(e) => {
+            formik.handleChange(e);
+            fetchApartments(e.target.value);
+          }}
+        >
+          <option value="">בחר משכיר</option>
+          {landlords.map((l) => (
+            <option key={l.id} value={l.id}>
+              {l.name}
+            </option>
+          ))}
+        </select>
+        <div>{formik.errors.landlordId}</div>
+
+        {/* דירות */}
+        <select
+          name="apartmentId"
+          value={formik.values.apartmentId}
+          onChange={formik.handleChange}
+          disabled={!formik.values.landlordId || loadingApartments}
+        >
+          <option value="">
+            {loadingApartments ? "טוען..." : "בחר דירה"}
+          </option>
+          {apartments.map((a) => (
+            <option key={a.id} value={a.id}>
+              {a.address}
+            </option>
+          ))}
+        </select>
+        <div>{formik.errors.apartmentId}</div>
+
+        <input
+          name="username"
+          placeholder="שם משתמש"
+          onChange={formik.handleChange}
+          value={formik.values.username}
+        />
+        <div>{formik.errors.username}</div>
+
+        <input
+          type="password"
+          name="password"
+          placeholder="סיסמה"
+          onChange={formik.handleChange}
+          value={formik.values.password}
+        />
+        <div>{formik.errors.password}</div>
+
+        <button type="submit">שמור</button>
+      </form>
     </div>
   );
-}
+};
+
+export default Tenant;

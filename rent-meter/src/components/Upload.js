@@ -64,11 +64,21 @@ const styles = {
     padding: '12px 24px',
     borderRadius: '4px',
     cursor: 'pointer',
+  },
+
+ // שדה להזנה ידנית
+manualInput: {
+    marginTop: '10px',
+    padding: '10px',
+    width: '50%',
+    fontSize: '16px',
   }
 };
 
 export default function Upload({ setScreen, setReading }) {
   const [imagePreview, setImagePreview] = useState(null);
+  // state להזנה ידנית
+  const [manualReading, setManualReading] = useState("");
 
   // פונקציה שמופעלת כשהמשתמש בוחר קובץ
   const handleFileChange = (event) => {
@@ -78,19 +88,34 @@ export default function Upload({ setScreen, setReading }) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result);
+        // אם בחר תמונה → ננקה הזנה ידנית (שלא יתנגש)
+      setManualReading("");
       };
+      
       reader.readAsDataURL(file);
     }
   };
 
   // פונקציה שמסמלת את סיום ההעלאה (זיוף API)
   const finishUpload = () => {
-    // ב-MVP אנו פשוט קובעים מספר פיקטיבי
-    const fakeReading = 500; // מספר בן 5 ספרות
-    setReading(fakeReading);
-    
-    // מעבר למסך האישור
-    setScreen("confirmation");
+    // אם יש הזנה ידנית → עדיפות לה
+    if (manualReading) {
+      setReading(Number(manualReading));
+      setScreen("confirmation");
+      return;
+    }
+
+    // אחרת → תמונה
+    if (imagePreview) {
+      const fakeReading = 500;
+      setReading(fakeReading);
+      setScreen("confirmation");
+      return;
+    }
+
+     // אם לא נבחר כלום
+    alert("בחרו תמונה או הזינו ערך ידני");
+
   };
 
   return (
@@ -121,12 +146,31 @@ export default function Upload({ setScreen, setReading }) {
           <img src={imagePreview} alt="קריאת מונה" style={styles.previewImage} />
         </div>
       )}
+      
+      <p style={{ marginTop: "10px" }}>או הזיני ידנית:</p>
+
+      <input
+        type="text"
+        inputMode="numeric"
+        placeholder="הכנסי קריאת מונה"
+        value={manualReading}
+        onChange={(e) => {
+          setManualReading(e.target.value);
+
+          //  אם מקלידים → ננקה תמונה
+          setImagePreview(null);
+        }}
+        style={styles.manualInput}
+      />
+
 
       {/* כפתורי פעולה */}
       <div style={styles.actionButtons}>
         <button style={styles.btnCancel} onClick={() => setScreen("tenant")}>ביטול</button>
-        {imagePreview && (
-          <button style={styles.btnConfirm} onClick={finishUpload}>אישור ושליחה לניתוח</button>
+        {(imagePreview || manualReading) && (
+          <button style={styles.btnConfirm} onClick={finishUpload}>
+            אישור ושליחה לניתוח
+          </button>
         )}
       </div>
     </div>
