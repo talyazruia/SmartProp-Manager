@@ -9,19 +9,26 @@ import jakarta.persistence.Id;
 public class Property {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // מזהה אוטומטי
+    private Long id;
+    
     private String address;
-    private String landlordUsername; // מקשר למשכיר
+    private String description;
     private double rentAmount;
+    private String landlordUsername;
 
-    public Property() {}
-
+    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
-    public String getLandlordUsername() { return landlordUsername; }
-    public void setLandlordUsername(String landlordUsername) { this.landlordUsername = landlordUsername; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+
     public double getRentAmount() { return rentAmount; }
     public void setRentAmount(double rentAmount) { this.rentAmount = rentAmount; }
+
+    public String getLandlordUsername() { return landlordUsername; }
+    public void setLandlordUsername(String landlordUsername) { this.landlordUsername = landlordUsername; }
 }

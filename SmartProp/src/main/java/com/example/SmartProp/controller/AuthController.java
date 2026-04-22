@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -20,47 +21,47 @@ public class AuthController {
     @Autowired
     private LandlordRepository landlordRepository;
 
-    // --- פונקציית התחברות (Login) ---
     @PostMapping("/login")
     public Map<String, String> login(@RequestBody Map<String, String> credentials) {
         String username = credentials.get("username");
         String password = credentials.get("password");
 
-        // בדיקה בטבלת שוכרים
-        var tenant = tenantRepository.findById(username);
+        Optional<Tenant> tenant = tenantRepository.findById(username);
         if (tenant.isPresent() && tenant.get().getPassword().equals(password)) {
-            return Map.of("status", "success", "role", "tenant", "name", tenant.get().getFullName());
+            return Map.of(
+                "status", "success", 
+                "role", "tenant", 
+                "name", tenant.get().getFirstName() + " " + tenant.get().getLastName()
+            );
         }
 
-        // בדיקה בטבלת משכירים
-        var landlord = landlordRepository.findById(username);
+        Optional<Landlord> landlord = landlordRepository.findById(username);
         if (landlord.isPresent() && landlord.get().getPassword().equals(password)) {
-            return Map.of("status", "success", "role", "landlord", "name", landlord.get().getFullName());
+            return Map.of(
+                "status", "success", 
+                "role", "landlord", 
+                "name", landlord.get().getFirstName() + " " + landlord.get().getLastName()
+            );
         }
 
         return Map.of("status", "error", "message", "שם משתמש או סיסמה שגויים");
     }
 
-    // --- פונקציית הרשמה לשוכר ---
     @PostMapping("/register/tenant")
-    public Map<String, String> registerTenant(@RequestBody Tenant newTenant) {
-        // בדיקה אם שם המשתמש קיים בשוכרים או במשכירים (כדי למנוע כפילויות במערכת)
-        if (tenantRepository.existsById(newTenant.getUsername()) || landlordRepository.existsById(newTenant.getUsername())) {
-            return Map.of("status", "error", "message", "שם המשתמש כבר תפוס במערכת");
+    public Map<String, String> registerTenant(@RequestBody Tenant tenant) {
+        if (tenantRepository.existsById(tenant.getUsername()) || landlordRepository.existsById(tenant.getUsername())) {
+            return Map.of("status", "error", "message", "שם המשתמש כבר קיים");
         }
-
-        tenantRepository.save(newTenant);
-        return Map.of("status", "success", "message", "שוכר נרשם בהצלחה!");
+        tenantRepository.save(tenant);
+        return Map.of("status", "success", "message", "שוכר נרשם בהצלחה");
     }
 
-    // --- פונקציית הרשמה למשכיר ---
     @PostMapping("/register/landlord")
-    public Map<String, String> registerLandlord(@RequestBody Landlord newLandlord) {
-        if (landlordRepository.existsById(newLandlord.getUsername()) || tenantRepository.existsById(newLandlord.getUsername())) {
-            return Map.of("status", "error", "message", "שם המשתמש כבר תפוס במערכת");
+    public Map<String, String> registerLandlord(@RequestBody Landlord landlord) {
+        if (landlordRepository.existsById(landlord.getUsername()) || tenantRepository.existsById(landlord.getUsername())) {
+            return Map.of("status", "error", "message", "שם המשתמש כבר קיים");
         }
-
-        landlordRepository.save(newLandlord);
-        return Map.of("status", "success", "message", "משכיר נרשם בהצלחה!");
+        landlordRepository.save(landlord);
+        return Map.of("status", "success", "message", "משכיר נרשם בהצלחה");
     }
 }
