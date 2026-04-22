@@ -1,50 +1,41 @@
-import React from "react";
-import logo from "../assets/logo.png";
+import React from 'react';
 
-export default function Login({ setScreen, setRole }) {
+export default function Register({ setScreen, setRole }) {
+
+
+    const handregister = (selectedRole) => {
+    setRole(selectedRole);
+    // אם הוא שוכר נשלח אותו למסך השוכר, אם משכיר ל-Dashboard
+    setScreen(selectedRole === "tenant" ? "tenant" : "landlord");
+  };
+
   return (
-
-    
     <div style={styles.container}>
-      
       <div style={styles.card}>
-        <img
-        src={logo}
-        alt="SmartProp Logo"
-        style={{ width: "300px", marginBottom: "20px" }}
-      />
-
-        <h1 style={styles.title}>
-          ברוכים הבאים ל- SmartProp-Manager
-        </h1>
-
+        <h1 style={styles.title}>ברוכים הבאים ל- SmartProp-Manager </h1>
+        <p style={styles.subtitle}>אנא בחר את סוג המשתמש כדי להתחיל</p>
         
-
         <div style={styles.buttonGroup}>
-
-          {/* הרשמה */}
-          <button
-            style={{ ...styles.button, backgroundColor: "#3f51b5" }}
-            onClick={() => setScreen("register")}
+          <button 
+            style={{...styles.button, backgroundColor: '#3f51b5'}} 
+            onClick={() => handregister("tenant")}
           >
-            הרשמה
+             אני שוכר
           </button>
-
-          {/* התחברות */}
-          <button
-            style={{ ...styles.button, backgroundColor: "#4caf50" }}
-            onClick={() => setScreen("signin")}
+          
+          <button 
+            style={{...styles.button, backgroundColor: '#3f51b5'}} 
+            onClick={() => handregister("landlord")}
           >
-            התחברות
+             אני משכיר
           </button>
-
         </div>
       </div>
     </div>
   );
 }
 
-
+// עיצוב בסיסי ומהיר בתוך הקובץ
 const styles = {
   container: {
     display: 'flex',
@@ -89,3 +80,4 @@ const styles = {
     fontWeight: 'bold'
   }
 };
+

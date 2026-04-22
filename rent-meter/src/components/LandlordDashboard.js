@@ -64,23 +64,8 @@ const styles = {
   }
 };
 
-export default function LandlordDashboard({ setScreen }) {
-  const [apartments, setApartments] = useState([
-    { 
-      id: 1, 
-      address: "רחוב הרצל 10, דירה 4", 
-      tenant: "דני כהן", 
-      isRented: true,
-      extraInfo: "חוזה עד: 01/01/2027. מונה מים משותף. חניה מס' 4." 
-    },
-    { 
-      id: 2, 
-      address: "בן גוריון 5, דירה 1", 
-      tenant: "—", 
-      isRented: false,
-      extraInfo: "דירה משופצת. מחפשים שוכר לטווח ארוך. כוללת מקרר." 
-    },
-  ]);
+export default function LandlordDashboard({ setScreen, apartments, setApartments }) {
+  
 
   const [selectedApt, setSelectedApt] = useState(null);
 
@@ -88,6 +73,21 @@ export default function LandlordDashboard({ setScreen }) {
     <div style={styles.container}>
       <h1 style={styles.title}>ניהול נכסים - מבט על </h1>
       
+      <button
+  style={{
+    marginTop: "10px",
+    padding: "10px 20px",
+    backgroundColor: "#4CAF50",
+    color: "white",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer"
+  }}
+  onClick={() => setScreen("addApartment")}
+>
+   הוספת דירה
+</button>
+
       <table style={styles.table}>
         <thead>
           <tr>

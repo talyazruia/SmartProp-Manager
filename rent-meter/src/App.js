@@ -1,15 +1,21 @@
 import { useState } from "react";
 // ייבוא כל המסכים מהתיקייה components
 import Login from "./components/Login";
-import Tenant from "./components/Tenant";
+import TenantDetails from "./components/TenantDetails";
 import Upload from "./components/Upload";
 import LandlordDashboard from "./components/LandlordDashboard";
+import ApartmentForm from "./components/ApartmentForm";
+import Tenant from "./components/Tenant";
+import Landlord from "./components/Landlord"
+import Register from "./components/Register";
+import SignIn from "./components/SignIn";
 
 function App() {
   // ניהול המצב של האפליקציה
   const [screen, setScreen] = useState("login"); // המסך המוצג (login, tenant, upload, confirmation, landlord)
   const [role, setRole] = useState(null);       // סוג המשתמש (tenant / landlord)
   const [reading, setReading] = useState(null); // מספר המונה שחולץ
+  const [apartments, setApartments] = useState([]);
 
   // פונקציה פשוטה למסך אישור (במקום קובץ נפרד, כדי לחסוך זמן ב-MVP)
   const ConfirmationScreen = () => (
@@ -37,10 +43,19 @@ function App() {
         <Login setScreen={setScreen} setRole={setRole} />
       )}
 
-      {/* 2. מסך הבית של השוכר */}
+      {screen === "register" && (
+        <Register setScreen={setScreen} setRole={setRole} />
+      )}
+
+      {screen === "signin" && (
+        <SignIn setScreen={setScreen} />
+      )}
+
+
       {screen === "tenant" && (
         <Tenant setScreen={setScreen} />
       )}
+
 
       {/* 3. מסך צילום/העלאת תמונה */}
       {screen === "upload" && (
@@ -52,11 +67,18 @@ function App() {
         <ConfirmationScreen />
       )}
 
-      {/* 5. לוח בקרה למשכיר */}
+
       {screen === "landlord" && (
-        <LandlordDashboard setScreen={setScreen} />
+        <Landlord />
       )}
 
+      {screen === "addApartment" && (
+        <ApartmentForm 
+          setScreen={setScreen}
+          setApartments={setApartments}
+        />
+      )}
+      
     </div>
   );
 }
