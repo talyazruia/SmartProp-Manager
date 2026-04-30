@@ -109,6 +109,7 @@ export default function LandlordDashboard({ setScreen, apartments, setApartments
         <thead>
           <tr>
             <th style={styles.th}>כתובת</th>
+            <th style={styles.th}>מחיר</th>
             <th style={styles.th}>סטטוס</th>
             <th style={styles.th}>שוכר</th>
             <th style={styles.th}>פעולות</th>
@@ -118,6 +119,9 @@ export default function LandlordDashboard({ setScreen, apartments, setApartments
           {apartments.map((apt) => (
             <tr key={apt.id}>
               <td style={styles.td}>{apt.address}</td>
+              <td style={styles.td}>
+                {apt.price ? `${apt.price} ₪` : "—"}
+              </td>
               <td style={styles.td}>
                 <span style={{
                   ...styles.badge, 

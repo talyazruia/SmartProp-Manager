@@ -66,6 +66,7 @@ export default function ApartmentForm({ setScreen, setApartments }) {
     buildingNumber: "",
     apartmentNumber: "",
     description: "",
+    price: "",
   });
 
   const handleChange = (e) => {
@@ -86,6 +87,7 @@ export default function ApartmentForm({ setScreen, setApartments }) {
       tenant: "—",
       isRented: false,
       extraInfo: formData.description,
+      price: formData.price,
     };
 
     setApartments((prev) => [...prev, newApartment]);
@@ -98,6 +100,9 @@ export default function ApartmentForm({ setScreen, setApartments }) {
       <h2 style={styles.title}>הוספת דירה חדשה</h2>
 
       <form onSubmit={handleSubmit} style={styles.form}>
+        <div style={{ width: "100%", textAlign: "right" }}>
+          <label>עיר</label>
+        </div>
         <div style={{ position: "relative", zIndex: 100, width: "100%" }}>
         <CitySearch
           value={formData.city}
@@ -107,39 +112,58 @@ export default function ApartmentForm({ setScreen, setApartments }) {
         />
        </div>
 
+        <div style={{ width: "100%", textAlign: "right" }}>
+          <label>רחוב</label>
+        </div>
         <input
           style={styles.input}
           type="text"
           name="street"
-          placeholder="רחוב"
           value={formData.street}
           onChange={handleChange}
           required
         />
-
+        <div style={{ width: "100%", textAlign: "right" }}>
+            <label>מספר בניין</label>
+          </div>
         <input
           style={styles.input}
           type="number"
           name="buildingNumber"
-          placeholder="מספר בניין"
           value={formData.buildingNumber}
           onChange={handleChange}
           required
         />
 
+        <div style={{ width: "100%", textAlign: "right" }}>
+          <label>מספר דירה</label>
+        </div>
         <input
           style={styles.input}
           type="number"
           name="apartmentNumber"
-          placeholder="מספר דירה"
           value={formData.apartmentNumber}
           onChange={handleChange}
         />
 
+        <div style={{ width: "100%", textAlign: "right" }}>
+          <label>עלות חודשית</label>
+        </div>
+        <input
+          style={styles.input}
+          type="number"
+          name="price"
+          value={formData.price}
+          onChange={handleChange}
+          required
+        />
+
+        <div style={{ width: "100%", textAlign: "right" }}>
+          <label>תיאור הדירה</label>
+        </div>
         <textarea
           style={styles.textarea}
           name="description"
-          placeholder="תיאור הדירה"
           value={formData.description}
           onChange={handleChange}
         />
@@ -151,7 +175,7 @@ export default function ApartmentForm({ setScreen, setApartments }) {
 
       <button
         style={{ ...styles.button, marginTop: "10px" }}
-        onClick={() => setScreen("landlord")}
+        onClick={() => setScreen("landlordDashboard")}
       >
         חזרה למסך הבית
       </button>
