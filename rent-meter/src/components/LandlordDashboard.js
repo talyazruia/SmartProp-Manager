@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const styles = {
   container: {
@@ -64,10 +64,16 @@ const styles = {
   }
 };
 
-export default function LandlordDashboard({ setScreen, apartments, setApartments }) {
+export default function LandlordDashboard({ setScreen, apartments, setApartments, user }) {
   
-
+  
   const [selectedApt, setSelectedApt] = useState(null);
+
+  useEffect(() => {
+    if (user && user.apartments) {
+      setApartments(user.apartments);
+    }
+  }, [user, setApartments]);
 
   return (
     <div style={styles.container}>

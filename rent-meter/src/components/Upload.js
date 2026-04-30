@@ -166,7 +166,7 @@ export default function Upload({ setScreen, setReading }) {
 
       {/* כפתורי פעולה */}
       <div style={styles.actionButtons}>
-        <button style={styles.btnCancel} onClick={() => setScreen("tenant")}>ביטול</button>
+        <button style={styles.btnCancel} onClick={() => setScreen("tenantDetails")}>ביטול</button>
         {(imagePreview || manualReading) && (
           <button style={styles.btnConfirm} onClick={finishUpload}>
             אישור ושליחה לניתוח

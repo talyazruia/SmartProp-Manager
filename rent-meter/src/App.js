@@ -16,6 +16,7 @@ function App() {
   const [role, setRole] = useState(null);       // סוג המשתמש (tenant / landlord)
   const [reading, setReading] = useState(null); // מספר המונה שחולץ
   const [apartments, setApartments] = useState([]);
+  const [user, setUser] = useState(null);
 
   // פונקציה פשוטה למסך אישור (במקום קובץ נפרד, כדי לחסוך זמן ב-MVP)
   const ConfirmationScreen = () => (
@@ -48,8 +49,21 @@ function App() {
       )}
 
       {screen === "signin" && (
-        <SignIn setScreen={setScreen} />
+        <SignIn setScreen={setScreen} setUser={setUser}/>
       )}
+
+      {screen === "tenantDetails" && (
+        <TenantDetails setScreen={setScreen} user={user}/>
+      )}
+
+      {screen === "landlordDashboard" && (
+         <LandlordDashboard
+           user={user}
+           apartments={apartments}
+           setApartments={setApartments}
+           setScreen={setScreen}
+         />
+       )}
 
 
       {screen === "tenant" && (
@@ -78,6 +92,7 @@ function App() {
           setApartments={setApartments}
         />
       )}
+
       
     </div>
   );

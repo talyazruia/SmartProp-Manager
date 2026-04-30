@@ -48,22 +48,19 @@ const styles = {
   }
 };
 
-export default function TenantDetails({ setScreen }) {
-  // נתונים סטטיים ל-MVP
-  const tenantName = "דני כהן";
-  const address = "רחוב הרצל 10, דירה 4, תל אביב";
-  const status = "לא שולם (חודש אפריל)";
+export default function TenantDetails({ setScreen, user }) {
+  console.log("USER:", user);
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.title}>שלום, {tenantName} </h1>
+      <h1 style={styles.title}>שלום, {user?.name} </h1>
       
       <div style={styles.card}>
         <h3>פרטי דירה:</h3>
-        <p style={styles.details}>{address}</p>
+        <p style={styles.details}>{user?.address}</p>
         
         <h3>סטטוס תשלום:</h3>
-        <p style={{...styles.details, ...styles.statusBad}}>{status}</p>
+        <p style={{...styles.details, ...styles.statusBad}}>{user?.status}</p>
       </div>
 
       <button 
