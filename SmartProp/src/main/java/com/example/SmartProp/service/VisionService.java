@@ -3,6 +3,9 @@ package com.example.SmartProp.service;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
+
+import com.google.api.client.util.Value;
+
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -14,7 +17,8 @@ import java.util.regex.Pattern;
 public class VisionService {
 
     // ה-API Key שלך מגוגל
-    private final String GOOGLE_API_KEY = "AIzaSyB_U_sgTrzoDbxAK5SEv8vE7hSFXsAhldE";
+    @Value("${google.api.key}")
+    private final String GOOGLE_API_KEY;
     private final String API_URL = "https://vision.googleapis.com/v1/images:annotate?key=" + GOOGLE_API_KEY;
 
     public String extractTextFromImage(String base64Image) {

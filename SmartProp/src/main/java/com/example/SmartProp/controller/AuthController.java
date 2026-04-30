@@ -29,10 +29,12 @@ public class AuthController {
         Optional<Tenant> tenant = tenantRepository.findById(username);
         if (tenant.isPresent() && tenant.get().getPassword().equals(password)) {
             return Map.of(
-                "status", "success", 
-                "role", "tenant", 
-                "name", tenant.get().getFirstName() + " " + tenant.get().getLastName()
-            );
+    "status", "success", 
+    "role", "tenant", 
+    "name", tenant.get().getFirstName() + " " + tenant.get().getLastName(),
+    "username", tenant.get().getUsername(),
+    "apartmentId", tenant.get().getApartmentId() != null ? tenant.get().getApartmentId() : ""
+);
         }
 
         Optional<Landlord> landlord = landlordRepository.findById(username);
