@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 
 const styles = {
   container: {
@@ -9,17 +10,9 @@ const styles = {
     direction: 'rtl',
     textAlign: 'center',
   },
-  title: {
-    fontSize: '22px',
-    marginBottom: '20px',
-  },
-  // ה"טריק": הכפתור האמיתי מוסתר
-  hiddenInput: {
-    display: 'none',
-  },
-  // עיצוב הכפתור המדומה
+  hiddenInput: { display: 'none' },
   uploadLabel: {
-    backgroundColor: '#3f51b5', // כחול
+    backgroundColor: '#3f51b5',
     color: 'white',
     padding: '15px 20px',
     borderRadius: '8px',
@@ -50,7 +43,7 @@ const styles = {
     justifyContent: 'center',
   },
   btnConfirm: {
-    backgroundColor: '#4CAF50', // ירוק
+    backgroundColor: '#4CAF50',
     color: 'white',
     border: 'none',
     padding: '12px 24px',
@@ -58,16 +51,14 @@ const styles = {
     cursor: 'pointer',
   },
   btnCancel: {
-    backgroundColor: '#757575', // אפור
+    backgroundColor: '#757575',
     color: 'white',
     border: 'none',
     padding: '12px 24px',
     borderRadius: '4px',
     cursor: 'pointer',
   },
-
- // שדה להזנה ידנית
-manualInput: {
+  manualInput: {
     marginTop: '10px',
     padding: '10px',
     width: '50%',
@@ -75,80 +66,73 @@ manualInput: {
   }
 };
 
-export default function Upload({ setScreen, setReading }) {
+export default function Upload({ setScreen, setReading, user }) {
   const [imagePreview, setImagePreview] = useState(null);
-  // state להזנה ידנית
+  const [imageFile, setImageFile] = useState(null);
   const [manualReading, setManualReading] = useState("");
 
-  // פונקציה שמופעלת כשהמשתמש בוחר קובץ
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (file) {
-      // יצירת URL מקומי לצורך תצוגה מקדימה בלבד
+      setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result);
-        // אם בחר תמונה → ננקה הזנה ידנית (שלא יתנגש)
-      setManualReading("");
+        setManualReading("");
       };
-      
       reader.readAsDataURL(file);
     }
   };
 
-  // פונקציה שמסמלת את סיום ההעלאה (זיוף API)
-  const finishUpload = () => {
-    // אם יש הזנה ידנית → עדיפות לה
+  const finishUpload = async () => {
     if (manualReading) {
       setReading(Number(manualReading));
       setScreen("confirmation");
       return;
     }
-
-    // אחרת → תמונה
-    if (imagePreview) {
-      const fakeReading = 500;
-      setReading(fakeReading);
-      setScreen("confirmation");
+    if (imageFile) {
+      try {
+        const formData = new FormData();
+        formData.append("image", imageFile);
+        formData.append("username", user.username);
+        formData.append("previous", 0);
+        formData.append("updateRate", false);
+        const res = await axios.post(
+          "http://localhost:8081/api/electricity/calculate-from-image",
+          formData
+        );
+        setReading(res.data);
+        setScreen("confirmation");
+      } catch (err) {
+        alert("שגיאה בשליחה");
+      }
       return;
     }
-
-     // אם לא נבחר כלום
-    alert("בחרו תמונה או הזינו ערך ידני");
-
+    alert("בחרי תמונה או הזיני ערך ידני");
   };
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.title}>שלב 1: צילום המונה </h2>
+      <h2>שלב 1: צילום המונה</h2>
       <p>וודאי שהמספרים במונה ברורים וקריאים.</p>
-
-      {/* הכפתור המדומה (label) */}
       <label htmlFor="icon-button-file" style={styles.uploadLabel}>
-         {imagePreview ? "שנה תמונה" : "צלם או בחר תמונה"}
+        {imagePreview ? "שנה תמונה" : "צלם או בחר תמונה"}
       </label>
-
-      {/* הכפתור האמיתי, הנסתר */}
-      {/* בנייד, capture="environment" ינסה לפתוח ישירות את המצלמה האחורית */}
-      <input 
-        accept="image/*" 
-        style={styles.hiddenInput} 
-        id="icon-button-file" 
-        type="file" 
+      <input
+        accept="image/*"
+        style={styles.hiddenInput}
+        id="icon-button-file"
+        type="file"
         capture="environment"
-        onChange={handleFileChange} 
+        onChange={handleFileChange}
       />
-
-      {/* תצוגה מקדימה של התמונה שנבחרה */}
       {imagePreview && (
         <div style={styles.previewContainer}>
           <h4>תצוגה מקדימה:</h4>
           <img src={imagePreview} alt="קריאת מונה" style={styles.previewImage} />
         </div>
       )}
-      
       <p style={{ marginTop: "10px" }}>או הזיני ידנית:</p>
-
       <input
         type="text"
         inputMode="numeric"
@@ -156,15 +140,11 @@ export default function Upload({ setScreen, setReading }) {
         value={manualReading}
         onChange={(e) => {
           setManualReading(e.target.value);
-
-          //  אם מקלידים → ננקה תמונה
           setImagePreview(null);
+          setImageFile(null);
         }}
         style={styles.manualInput}
       />
-
-
-      {/* כפתורי פעולה */}
       <div style={styles.actionButtons}>
         <button style={styles.btnCancel} onClick={() => setScreen("tenantDetails")}>ביטול</button>
         {(imagePreview || manualReading) && (

@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import axios from "axios";
+
 
 const styles = {
   container: {
@@ -70,10 +72,19 @@ export default function LandlordDashboard({ setScreen, apartments, setApartments
   const [selectedApt, setSelectedApt] = useState(null);
 
   useEffect(() => {
-    if (user && user.apartments) {
-      setApartments(user.apartments);
+  const fetchApartments = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:8081/api/properties/landlord/${user.username}`
+      );
+      setApartments(res.data);
+    } catch (err) {
+      console.error("שגיאה בטעינת דירות", err);
     }
-  }, [user, setApartments]);
+  };
+  if (user) fetchApartments();
+}, [user]);
+
 
   return (
     <div style={styles.container}>

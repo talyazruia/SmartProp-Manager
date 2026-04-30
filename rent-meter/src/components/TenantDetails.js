@@ -1,14 +1,13 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-import React from 'react';
-
-// עיצוב inline מהיר
 const styles = {
   container: {
     padding: '20px',
     maxWidth: '500px',
     margin: '0 auto',
     fontFamily: 'sans-serif',
-    direction: 'rtl', // תמיכה בעברית
+    direction: 'rtl',
     textAlign: 'center',
   },
   card: {
@@ -30,11 +29,11 @@ const styles = {
     marginBottom: '20px',
   },
   statusBad: {
-    color: '#e74c3c', // אדום ל"לא שולם"
+    color: '#e74c3c',
     fontWeight: 'bold',
   },
   uploadButton: {
-    backgroundColor: '#3f51b5', // כתום צומי
+    backgroundColor: '#3f51b5',
     color: 'white',
     border: 'none',
     padding: '15px 30px',
@@ -43,30 +42,37 @@ const styles = {
     cursor: 'pointer',
     fontWeight: 'bold',
     width: '100%',
-    boxShadow: '0 4px 10px rgba(255,152,0,0.3)',
-    transition: 'transform 0.1s',
   }
 };
 
 export default function TenantDetails({ setScreen, user }) {
-  console.log("USER:", user);
+  const [apartment, setApartment] = useState(null);
+
+  useEffect(() => {
+    const fetchApartment = async () => {
+      try {
+        const res = await axios.get("http://localhost:8081/api/properties/all");
+        const myApt = res.data.find(
+          (p) => String(p.id) === String(user?.apartmentId)
+        );
+        setApartment(myApt);
+      } catch (err) {
+        console.error("שגיאה בטעינת דירה", err);
+      }
+    };
+    if (user) fetchApartment();
+  }, [user]);
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.title}>שלום, {user?.name} </h1>
-      
+      <h1 style={styles.title}>שלום, {user?.name}</h1>
       <div style={styles.card}>
         <h3>פרטי דירה:</h3>
-        <p style={styles.details}>{user?.address}</p>
-        
+        <p style={styles.details}>{apartment?.address || "טוען..."}</p>
         <h3>סטטוס תשלום:</h3>
-        <p style={{...styles.details, ...styles.statusBad}}>{user?.status}</p>
+        <p style={{...styles.details, ...styles.statusBad}}>לא שולם</p>
       </div>
-
-      <button 
-        style={styles.uploadButton}
-        onClick={() => setScreen("upload")} // מעבר למסך העלאה
-      >
+      <button style={styles.uploadButton} onClick={() => setScreen("upload")}>
         העלאת קריאת מונה חדשה
       </button>
     </div>

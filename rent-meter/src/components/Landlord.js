@@ -40,7 +40,7 @@ const Landlord = () => {
     }),
     onSubmit: async (values) => {
       try {
-        await axios.post("http://localhost:8080/api/tenants", values);
+        await axios.post("http://localhost:8081/api/tenants", values);
         alert("משכיר נשמר בהצלחה ");
       } catch (err) {
         console.error(err);

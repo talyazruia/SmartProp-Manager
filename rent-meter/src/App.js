@@ -73,7 +73,7 @@ function App() {
 
       {/* 3. מסך צילום/העלאת תמונה */}
       {screen === "upload" && (
-        <Upload setScreen={setScreen} setReading={setReading} />
+        <Upload setScreen={setScreen} setReading={setReading} user={user}/>
       )}
 
       {/* 4. מסך אישור קבלת נתונים */}
