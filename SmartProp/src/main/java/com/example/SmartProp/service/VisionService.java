@@ -18,7 +18,7 @@ public class VisionService {
 
     // ה-API Key שלך מגוגל
     @Value("${google.api.key}")
-    private final String GOOGLE_API_KEY;
+    private final String GOOGLE_API_KEY= new String("AIzaSyB_U_sgTrzoDbxAK5SEv8vE7hSFXsAhldE");
     private final String API_URL = "https://vision.googleapis.com/v1/images:annotate?key=" + GOOGLE_API_KEY;
 
     public String extractTextFromImage(String base64Image) {

@@ -16,12 +16,12 @@ public class ElectricityService {
     private SettingsRepository settingsRepository;
 
     @Autowired
-    private PaymentRepository paymentRepository; // הוספנו את הגישה לטבלת התשלומים
+    private PaymentRepository paymentRepository;
 
-    public String calculateAndSaveBill(String tenantUsername, double current, double previous, double rate, boolean updateRate) {
+    public String calculateAndSaveBill(String tenantUsername, double current, double rate, boolean updateRate, Long propertyId) {
         double rateToUse;
 
-        // 1. ניהול התעריף (מול טבלת settings)
+        // 1. ניהול התעריף
         if (updateRate) {
             SystemSettings electricitySetting = new SystemSettings();
             electricitySetting.setSettingKey("electricity_rate");
@@ -33,29 +33,33 @@ public class ElectricityService {
             if (savedSetting.isPresent()) {
                 rateToUse = savedSetting.get().getSettingValue();
             } else {
-                rateToUse = 0.6; // דיפולט
+                rateToUse = 0.6;
                 saveDefaultRate(0.6);
             }
         }
 
-        // 2. החישוב המתמטי
+        // 2. שליפת הקריאה האחרונה מהDB
+        Payment lastPayment = paymentRepository.findFirstByTenantUsernameOrderByDateDesc(tenantUsername);
+        double previous = (lastPayment != null) ? lastPayment.getMeterReading() : 0;
+
+        // 3. החישוב
         double consumption = current - previous;
         double totalCost = consumption * rateToUse;
 
-        // 3. שמירת היסטוריית התשלום (מול טבלת payments)
+        // 4. שמירת התשלום
         Payment payment = new Payment();
         payment.setTenantUsername(tenantUsername);
         payment.setMeterReading(current);
         payment.setAmount(totalCost);
         payment.setDate(LocalDate.now());
-        payment.setPaid(false); // כברירת מחדל, החשבון עוד לא שולם
+        payment.setPropertyId(propertyId);
         paymentRepository.save(payment);
 
-        // 4. בניית ההודעה שתחזור לפרונט
-        String message = String.format("צריכה: %.2f קוט\"ש. מחיר: %.2f ש\"ח. סה\"כ לתשלום: %.2f ש\"ח.", 
-                                        consumption, rateToUse, totalCost);
-        
-        message += " (החשבון נשמר בהיסטוריית התשלומים)";
+        // 5. בניית ההודעה
+        String message = String.format(
+            "קריאה קודמת: %.0f | קריאה נוכחית: %.0f | צריכה: %.0f קוט\"ש | תעריף: %.2f | סה\"כ לתשלום: %.2f ש\"ח",
+            previous, current, consumption, rateToUse, totalCost
+        );
         return message;
     }
 

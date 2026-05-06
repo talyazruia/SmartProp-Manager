@@ -42,8 +42,9 @@ public class AuthController {
             return Map.of(
                 "status", "success", 
                 "role", "landlord", 
-                "name", landlord.get().getFirstName() + " " + landlord.get().getLastName()
-            );
+                "name", landlord.get().getFirstName() + " " + landlord.get().getLastName(),
+                "username", landlord.get().getUsername()
+                );
         }
 
         return Map.of("status", "error", "message", "שם משתמש או סיסמה שגויים");

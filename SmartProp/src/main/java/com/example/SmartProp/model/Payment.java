@@ -12,11 +12,11 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
+    private Long propertyId;
     private String tenantUsername;
     private double meterReading; // ודאי שהשם כתוב בדיוק ככה
     private double amount;
     private LocalDate date;
-    private boolean isPaid;
 
     // הגטר והסטר שחסרים לך כנראה:
     public double getMeterReading() {
@@ -30,7 +30,8 @@ public class Payment {
     // שאר הגטרים והסטרים (חשוב שיהיו כולם)
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-
+    public Long getPropertyId() { return propertyId; }
+    public void setPropertyId(Long propertyId) { this.propertyId = propertyId; }
     public String getTenantUsername() { return tenantUsername; }
     public void setTenantUsername(String tenantUsername) { this.tenantUsername = tenantUsername; }
 
@@ -40,6 +41,4 @@ public class Payment {
     public LocalDate getDate() { return date; }
     public void setDate(LocalDate date) { this.date = date; }
 
-    public boolean isPaid() { return isPaid; }
-    public void setPaid(boolean paid) { isPaid = paid; }
 }
