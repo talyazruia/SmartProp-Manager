@@ -10,7 +10,13 @@ import java.util.List;
 @RequestMapping("/api/landlords")
 @CrossOrigin(origins = "http://localhost:3000")
 public class LandlordController {
-
+   @PostMapping
+public Landlord createLandlord(@RequestBody Landlord landlord) {
+    // השורה הזו תדפיס לך ב-IntelliJ אם הבקשה הגיעה
+    System.out.println(">>> Request received for username: " + landlord.getUsername());
+    
+    return landlordRepository.save(landlord);
+}
     @Autowired
     private LandlordRepository landlordRepository;
 

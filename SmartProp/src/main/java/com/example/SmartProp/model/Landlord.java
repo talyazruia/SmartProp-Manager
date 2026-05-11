@@ -13,7 +13,21 @@ public class Landlord {
     private String phone;
     private String email;
 
-    // Getters and Setters
+    // 1. בנאי ריק - זה מה שהיה חסר וזה קריטי ל-Hibernate!
+    public Landlord() {
+    }
+
+    // 2. בנאי מלא - עוזר לך ליצור אובייקטים בקלות בתוך הקוד במידת הצורך
+    public Landlord(String username, String password, String firstName, String lastName, String phone, String email) {
+        this.username = username;
+        this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.phone = phone;
+        this.email = email;
+    }
+
+    // Getters and Setters (הקוד שלך היה מצוין)
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
 
