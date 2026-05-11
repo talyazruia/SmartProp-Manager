@@ -85,18 +85,35 @@ export default function Upload({ setScreen, setReading, user }) {
   };
 
   const finishUpload = async () => {
+    // מקרה 1: הזנה ידנית
     if (manualReading) {
-      setReading(Number(manualReading));
-      setScreen("confirmation");
+      try {
+        const res = await axios.get(
+          "http://localhost:8081/api/electricity/calculate", {
+            params: {
+              username: user.username,
+              current: Number(manualReading),
+              updateRate: false,
+              propertyId: user.apartmentId
+            }
+          }
+        );
+        setReading(res.data);
+        setScreen("confirmation");
+      } catch (err) {
+        alert("שגיאה בשליחה");
+      }
       return;
     }
+
+    // מקרה 2: תמונה
     if (imageFile) {
       try {
         const formData = new FormData();
         formData.append("image", imageFile);
         formData.append("username", user.username);
-        formData.append("previous", 0);
         formData.append("updateRate", false);
+        formData.append("propertyId", user.apartmentId);
         const res = await axios.post(
           "http://localhost:8081/api/electricity/calculate-from-image",
           formData
@@ -108,6 +125,7 @@ export default function Upload({ setScreen, setReading, user }) {
       }
       return;
     }
+
     alert("בחרי תמונה או הזיני ערך ידני");
   };
 
