@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from "axios";
 import CitySearch from "../services-import-city";
 
 const styles = {
@@ -18,13 +19,7 @@ const styles = {
   form: {
     display: "flex",
     flexDirection: "column",
-    gap: "12px", // זה מה שמייצר את הרווחים בין כל השדות
-    
-  },
-
-  title: {
-    marginBottom: "20px",
-    color: "#333",
+    gap: "12px",
   },
 
   input: {
@@ -59,7 +54,11 @@ const styles = {
   },
 };
 
-export default function ApartmentForm({ setScreen, setApartments }) {
+export default function ApartmentForm({
+  setScreen,
+  setApartments,
+  user,
+}) {
   const [formData, setFormData] = useState({
     city: "",
     street: "",
@@ -78,54 +77,63 @@ export default function ApartmentForm({ setScreen, setApartments }) {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const newApartment = {
-      id: Date.now(),
+    // התאמה מלאה ל־Spring Property model שלך
+    const property = {
       address: `${formData.street} ${formData.buildingNumber}, דירה ${formData.apartmentNumber}, ${formData.city}`,
-      tenant: "—",
-      isRented: false,
-      extraInfo: formData.description,
-      price: formData.price,
+      description: formData.description,
+      rentAmount: Number(formData.price),
+      landlordUsername: user?.username,
     };
 
-    setApartments((prev) => [...prev, newApartment]);
+    try {
+      const res = await axios.post(
+        "http://localhost:8081/api/properties/add",
+        property
+      );
 
-    setScreen("landlord");
+      console.log("Property saved:", res.data);
+
+      // לא חייבים לעדכן כאן - הדשבורד כבר טוען מהשרת
+      setScreen("landlordDashboard");
+
+    } catch (err) {
+      console.error("Error saving property:", err);
+
+      if (err.response) {
+        console.log("Server response:", err.response.data);
+      }
+
+      alert("שגיאה בשמירת דירה ❗");
+    }
   };
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.title}>הוספת דירה חדשה</h2>
+      <h2>הוספת דירה חדשה</h2>
 
       <form onSubmit={handleSubmit} style={styles.form}>
-        <div style={{ width: "100%", textAlign: "right" }}>
-          <label>עיר</label>
-        </div>
-        <div style={{ position: "relative", zIndex: 100, width: "100%" }}>
+
+        <label>עיר</label>
         <CitySearch
           value={formData.city}
           onChange={(city) =>
             setFormData((prev) => ({ ...prev, city }))
           }
         />
-       </div>
 
-        <div style={{ width: "100%", textAlign: "right" }}>
-          <label>רחוב</label>
-        </div>
+        <label>רחוב</label>
         <input
           style={styles.input}
-          type="text"
           name="street"
           value={formData.street}
           onChange={handleChange}
           required
         />
-        <div style={{ width: "100%", textAlign: "right" }}>
-            <label>מספר בניין</label>
-          </div>
+
+        <label>מספר בניין</label>
         <input
           style={styles.input}
           type="number"
@@ -135,9 +143,7 @@ export default function ApartmentForm({ setScreen, setApartments }) {
           required
         />
 
-        <div style={{ width: "100%", textAlign: "right" }}>
-          <label>מספר דירה</label>
-        </div>
+        <label>מספר דירה</label>
         <input
           style={styles.input}
           type="number"
@@ -146,9 +152,7 @@ export default function ApartmentForm({ setScreen, setApartments }) {
           onChange={handleChange}
         />
 
-        <div style={{ width: "100%", textAlign: "right" }}>
-          <label>עלות חודשית</label>
-        </div>
+        <label>שכר דירה</label>
         <input
           style={styles.input}
           type="number"
@@ -158,9 +162,7 @@ export default function ApartmentForm({ setScreen, setApartments }) {
           required
         />
 
-        <div style={{ width: "100%", textAlign: "right" }}>
-          <label>תיאור הדירה</label>
-        </div>
+        <label>תיאור הדירה</label>
         <textarea
           style={styles.textarea}
           name="description"

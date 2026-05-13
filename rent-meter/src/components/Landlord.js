@@ -13,57 +13,146 @@ const Landlord = ({ setScreen, setUser }) => {
       username: "",
       password: "",
     },
+
     validationSchema: Yup.object({
       firstName: Yup.string().required("חובה"),
       lastName: Yup.string().required("חובה"),
       phone: Yup.string().required("חובה"),
-      email: Yup.string().email("מייל לא תקין").required("חובה"),
-      username: Yup.string()
-        .matches(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/, "לפחות 8 תווים עם אותיות ומספרים")
+
+      email: Yup.string()
+        .email("מייל לא תקין")
         .required("חובה"),
+
+      username: Yup.string()
+        .matches(
+          /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/,
+          "לפחות 8 תווים עם אותיות ומספרים"
+        )
+        .required("חובה"),
+
       password: Yup.string()
-        .matches(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/, "לפחות 8 תווים עם אותיות ומספרים")
+        .matches(
+          /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/,
+          "לפחות 8 תווים עם אותיות ומספרים"
+        )
         .required("חובה"),
     }),
+
     onSubmit: async (values) => {
+      console.log("Submitting values:", values);
+
       try {
-        const res = await axios.post("http://localhost:8081/api/landlords", values);
+        const res = await axios.post(
+          "http://localhost:8081/api/landlords",
+          values
+        );
+
+        console.log("Saved successfully:", res.data);
+
         setUser({
           username: values.username,
           name: `${values.firstName} ${values.lastName}`,
           type: "landlord",
         });
+
         setScreen("landlordDashboard");
+
       } catch (err) {
-        console.error(err);
+        console.error("Save error:", err);
+
+        if (err.response) {
+          console.log("Server response:", err.response.data);
+          console.log("Status:", err.response.status);
+        }
+
         alert("שגיאה בשמירה ❗");
       }
     },
   });
 
   return (
-    <div style={{ maxWidth: "400px", margin: "auto", direction: "rtl" }}>
+    <div
+      style={{
+        maxWidth: "400px",
+        margin: "auto",
+        direction: "rtl",
+      }}
+    >
       <h2>יצירת משכיר</h2>
+
       <form onSubmit={formik.handleSubmit}>
-        <input name="firstName" placeholder="שם" onChange={formik.handleChange} value={formik.values.firstName} />
-        <div style={{ color: "red" }}>{formik.errors.firstName}</div>
 
-        <input name="lastName" placeholder="שם משפחה" onChange={formik.handleChange} value={formik.values.lastName} />
-        <div style={{ color: "red" }}>{formik.errors.lastName}</div>
+        <input
+          name="firstName"
+          placeholder="שם"
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          value={formik.values.firstName}
+        />
+        <div style={{ color: "red" }}>
+          {formik.touched.firstName && formik.errors.firstName}
+        </div>
 
-        <input name="phone" placeholder="טלפון" onChange={formik.handleChange} value={formik.values.phone} />
-        <div style={{ color: "red" }}>{formik.errors.phone}</div>
+        <input
+          name="lastName"
+          placeholder="שם משפחה"
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          value={formik.values.lastName}
+        />
+        <div style={{ color: "red" }}>
+          {formik.touched.lastName && formik.errors.lastName}
+        </div>
 
-        <input name="email" placeholder="מייל" onChange={formik.handleChange} value={formik.values.email} />
-        <div style={{ color: "red" }}>{formik.errors.email}</div>
+        <input
+          name="phone"
+          placeholder="טלפון"
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          value={formik.values.phone}
+        />
+        <div style={{ color: "red" }}>
+          {formik.touched.phone && formik.errors.phone}
+        </div>
 
-        <input name="username" placeholder="שם משתמש" onChange={formik.handleChange} value={formik.values.username} />
-        <div style={{ color: "red" }}>{formik.errors.username}</div>
+        <input
+          name="email"
+          placeholder="מייל"
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          value={formik.values.email}
+        />
+        <div style={{ color: "red" }}>
+          {formik.touched.email && formik.errors.email}
+        </div>
 
-        <input type="password" name="password" placeholder="סיסמה" onChange={formik.handleChange} value={formik.values.password} />
-        <div style={{ color: "red" }}>{formik.errors.password}</div>
+        <input
+          name="username"
+          placeholder="שם משתמש"
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          value={formik.values.username}
+        />
+        <div style={{ color: "red" }}>
+          {formik.touched.username && formik.errors.username}
+        </div>
 
-        <button type="submit">שמור</button>
+        <input
+          type="password"
+          name="password"
+          placeholder="סיסמה"
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          value={formik.values.password}
+        />
+        <div style={{ color: "red" }}>
+          {formik.touched.password && formik.errors.password}
+        </div>
+
+        <button type="submit">
+          שמור
+        </button>
+
       </form>
     </div>
   );

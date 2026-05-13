@@ -13,19 +13,43 @@ function App() {
   const [screen, setScreen] = useState("login");
   const [role, setRole] = useState(null);
   const [reading, setReading] = useState(null);
-  const [apartments, setApartments] = useState([]);
   const [user, setUser] = useState(null);
 
   const ConfirmationScreen = () => (
-    <div style={{ textAlign: "center", marginTop: "50px", direction: "rtl", fontFamily: "sans-serif" }}>
+    <div
+      style={{
+        textAlign: "center",
+        marginTop: "50px",
+        direction: "rtl",
+        fontFamily: "sans-serif",
+      }}
+    >
       <h2 style={{ color: "#4CAF50" }}>הקריאה נשלחה בהצלחה!</h2>
-      <div style={{ backgroundColor: "#f0f0f0", padding: "20px", borderRadius: "8px", display: "inline-block" }}>
+
+      <div
+        style={{
+          backgroundColor: "#f0f0f0",
+          padding: "20px",
+          borderRadius: "8px",
+          display: "inline-block",
+        }}
+      >
         <p>המספר שזוהה במערכת:</p>
         <h1 style={{ margin: "0" }}>{reading}</h1>
       </div>
-      <br /><br />
+
+      <br />
+      <br />
+
       <button
-        style={{ padding: "12px 24px", cursor: "pointer", backgroundColor: "#2196F3", color: "white", border: "none", borderRadius: "4px" }}
+        style={{
+          padding: "12px 24px",
+          cursor: "pointer",
+          backgroundColor: "#2196F3",
+          color: "white",
+          border: "none",
+          borderRadius: "4px",
+        }}
         onClick={() => setScreen("tenantDetails")}
       >
         חזרה לתפריט הראשי
@@ -36,51 +60,65 @@ function App() {
   return (
     <div className="App">
 
+      {/* login */}
       {screen === "login" && (
         <Login setScreen={setScreen} setRole={setRole} />
       )}
 
+      {/* register */}
       {screen === "register" && (
-        <Register setScreen={setScreen} setRole={setRole} setUser={setUser} />
+        <Register
+          setScreen={setScreen}
+          setRole={setRole}
+          setUser={setUser}
+        />
       )}
 
+      {/* signin */}
       {screen === "signin" && (
         <SignIn setScreen={setScreen} setUser={setUser} />
       )}
 
+      {/* tenant details */}
       {screen === "tenantDetails" && (
         <TenantDetails setScreen={setScreen} user={user} />
       )}
 
+      {/* landlord dashboard */}
       {screen === "landlordDashboard" && (
         <LandlordDashboard
           user={user}
-          apartments={apartments}
-          setApartments={setApartments}
           setScreen={setScreen}
         />
       )}
 
+      {/* tenant */}
       {screen === "tenant" && (
         <Tenant setScreen={setScreen} setUser={setUser} />
       )}
 
+      {/* upload */}
       {screen === "upload" && (
-        <Upload setScreen={setScreen} setReading={setReading} user={user} />
+        <Upload
+          setScreen={setScreen}
+          setReading={setReading}
+          user={user}
+        />
       )}
 
-      {screen === "confirmation" && (
-        <ConfirmationScreen />
-      )}
+      {/* confirmation */}
+      {screen === "confirmation" && <ConfirmationScreen />}
 
+      {/* landlord */}
       {screen === "landlord" && (
         <Landlord setScreen={setScreen} setUser={setUser} />
       )}
 
+      {/* add apartment */}
       {screen === "addApartment" && (
         <ApartmentForm
           setScreen={setScreen}
-          setApartments={setApartments}
+          user={user}
         />
       )}
 
