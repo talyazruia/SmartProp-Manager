@@ -14,11 +14,23 @@ public class Payment {
     
     private Long propertyId;
     private String tenantUsername;
-    private double meterReading; // ודאי שהשם כתוב בדיוק ככה
+    private double meterReading; 
     private double amount;
     private LocalDate date;
+    
+    // השדה החדש: סטטוס אישור התשלום על ידי המשכיר
+    private boolean isApproved = false; 
 
-    // הגטר והסטר שחסרים לך כנראה:
+    // גטרים וסטרים לשדה החדש
+    public boolean isApproved() {
+        return isApproved;
+    }
+
+    public void setApproved(boolean approved) {
+        isApproved = approved;
+    }
+
+    // גטרים וסטרים לשאר השדות
     public double getMeterReading() {
         return meterReading;
     }
@@ -27,18 +39,43 @@ public class Payment {
         this.meterReading = meterReading;
     }
 
-    // שאר הגטרים והסטרים (חשוב שיהיו כולם)
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public Long getPropertyId() { return propertyId; }
-    public void setPropertyId(Long propertyId) { this.propertyId = propertyId; }
-    public String getTenantUsername() { return tenantUsername; }
-    public void setTenantUsername(String tenantUsername) { this.tenantUsername = tenantUsername; }
+    public Long getId() { 
+        return id; 
+    }
+    
+    public void setId(Long id) { 
+        this.id = id; 
+    }
+    
+    public Long getPropertyId() { 
+        return propertyId; 
+    }
+    
+    public void setPropertyId(Long propertyId) { 
+        this.propertyId = propertyId; 
+    }
+    
+    public String getTenantUsername() { 
+        return tenantUsername; 
+    }
+    
+    public void setTenantUsername(String tenantUsername) { 
+        this.tenantUsername = tenantUsername; 
+    }
 
-    public double getAmount() { return amount; }
-    public void setAmount(double totalAmount) { this.amount = totalAmount; }
+    public double getAmount() { 
+        return amount; 
+    }
+    
+    public void setAmount(double totalAmount) { 
+        this.amount = totalAmount; 
+    }
 
-    public LocalDate getDate() { return date; }
-    public void setDate(LocalDate date) { this.date = date; }
-
+    public LocalDate getDate() { 
+        return date; 
+    }
+    
+    public void setDate(LocalDate date) { 
+        this.date = date; 
+    }
 }

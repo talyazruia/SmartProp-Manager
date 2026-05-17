@@ -1,9 +1,11 @@
 package com.example.SmartProp.service;
 
 import com.example.SmartProp.model.Payment;
-import com.example.SmartProp.model.SystemSettings;
+import com.example.SmartProp.model.Tenant;
+import com.example.SmartProp.model.Landlord;
 import com.example.SmartProp.repository.PaymentRepository;
-import com.example.SmartProp.repository.SettingsRepository;
+import com.example.SmartProp.repository.TenantRepository;
+import com.example.SmartProp.repository.LandlordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
@@ -13,40 +15,51 @@ import java.util.Optional;
 public class ElectricityService {
 
     @Autowired
-    private SettingsRepository settingsRepository;
+    private TenantRepository tenantRepository;
+
+    @Autowired
+    private LandlordRepository landlordRepository; // הזרקת ה-Repository של המשכירים
 
     @Autowired
     private PaymentRepository paymentRepository;
 
     public String calculateAndSaveBill(String tenantUsername, double current, double rate, boolean updateRate, Long propertyId) {
-        double rateToUse;
+        double rateToUse = 0.6; // ברירת מחדל לגיבוי
 
-        // 1. ניהול התעריף
-        if (updateRate) {
-            SystemSettings electricitySetting = new SystemSettings();
-            electricitySetting.setSettingKey("electricity_rate");
-            electricitySetting.setSettingValue(rate);
-            settingsRepository.save(electricitySetting);
-            rateToUse = rate;
-        } else {
-            Optional<SystemSettings> savedSetting = settingsRepository.findById("electricity_rate");
-            if (savedSetting.isPresent()) {
-                rateToUse = savedSetting.get().getSettingValue();
-            } else {
-                rateToUse = 0.6;
-                saveDefaultRate(0.6);
+        // 1. שליפת השוכר מהדאטהבייס כדי למצוא מי המשכיר שלו
+        Optional<Tenant> tenantOptional = tenantRepository.findById(tenantUsername);
+        
+        if (tenantOptional.isPresent()) {
+            Tenant tenant = tenantOptional.get();
+            
+            // שליפת המשכיר המשויך לשוכר זה (לפי שדה ה-landlordId שמוגדר אצלכן בטבלת השוכר)
+            String landlordUsername = tenant.getLandlordId(); 
+            Optional<Landlord> landlordOptional = landlordRepository.findById(landlordUsername);
+            
+            if (landlordOptional.isPresent()) {
+                Landlord landlord = landlordOptional.get();
+                
+                if (updateRate) {
+                    // אם המשכיר ביקש לעדכן, נעדכן את התעריף ישירות ברשומת המשכיר הזה
+                    landlord.setElectricityRate(rate);
+                    landlordRepository.save(landlord);
+                    rateToUse = rate;
+                } else {
+                    // אם לא מעדכנים, נשתמש בתעריף הקיים ששמור אצל המשכיר הספציפי הזה
+                    rateToUse = landlord.getElectricityRate();
+                }
             }
         }
 
-        // 2. שליפת הקריאה האחרונה מהDB
-        Payment lastPayment = paymentRepository.findFirstByTenantUsernameOrderByDateDesc(tenantUsername);
+        // 2. שליפת הקריאה האחרונה מה-DB (לפי מזהה ID יורד)
+        Payment lastPayment = paymentRepository.findFirstByTenantUsernameOrderByIdDesc(tenantUsername);
         double previous = (lastPayment != null) ? lastPayment.getMeterReading() : 0;
 
-        // 3. החישוב
+        // 3. החישוב הפיננסי
         double consumption = current - previous;
         double totalCost = consumption * rateToUse;
 
-        // 4. שמירת התשלום
+        // 4. שמירת התשלום החדש
         Payment payment = new Payment();
         payment.setTenantUsername(tenantUsername);
         payment.setMeterReading(current);
@@ -55,18 +68,16 @@ public class ElectricityService {
         payment.setPropertyId(propertyId);
         paymentRepository.save(payment);
 
-        // 5. בניית ההודעה
+        // 5. בניית ההודעה החוזרת
         String message = String.format(
-            "קריאה קודמת: %.0f | קריאה נוכחית: %.0f | צריכה: %.0f קוט\"ש | תעריף: %.2f | סה\"כ לתשלום: %.2f ש\"ח",
-            previous, current, consumption, rateToUse, totalCost
+        "קריאה קודמת: %.2f | קריאה נוכחית: %.2f | צריכה: %.2f קוט\"ש | תעריף משכיר: %.2f | סה\"כ לתשלום: %.2f ש\"ח",
+        previous, current, consumption, rateToUse, totalCost
         );
         return message;
     }
 
-    private void saveDefaultRate(double value) {
-        SystemSettings defaultSetting = new SystemSettings();
-        defaultSetting.setSettingKey("electricity_rate");
-        defaultSetting.setSettingValue(value);
-        settingsRepository.save(defaultSetting);
+    public double getPreviousReadingForTenant(String tenantUsername) {
+        Payment lastPayment = paymentRepository.findFirstByTenantUsernameOrderByIdDesc(tenantUsername);
+        return (lastPayment != null) ? lastPayment.getMeterReading() : 0;
     }
 }
