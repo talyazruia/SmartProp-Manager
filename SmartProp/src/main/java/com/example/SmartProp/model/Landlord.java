@@ -30,10 +30,6 @@ public class Landlord {
         this.firstName = firstName;
         this.lastName = lastName;
         this.phone = phone;
-        this.email = email;
-        this.bankName = bankName;
-        this.bankBranch = bankBranch;
-        this.bankAccountNumber = bankAccountNumber;
         this.electricityRate = electricityRate;
     }
 
@@ -42,12 +38,6 @@ public class Landlord {
     public void setElectricityRate(double electricityRate) { this.electricityRate = electricityRate; }
 
     // שאר הגטרים והסטרים הקיימים
-    public String getBankName() { return bankName; }
-    public void setBankName(String bankName) { this.bankName = bankName; }
-    public String getBankBranch() { return bankBranch; }
-    public void setBankBranch(String bankBranch) { this.bankBranch = bankBranch; }
-    public String getBankAccountNumber() { return bankAccountNumber; }
-    public void setBankAccountNumber(String bankAccountNumber) { this.bankAccountNumber = bankAccountNumber; }
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
     public String getPassword() { return password; }
@@ -58,6 +48,4 @@ public class Landlord {
     public void setLastName(String lastName) { this.lastName = lastName; }
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
 }

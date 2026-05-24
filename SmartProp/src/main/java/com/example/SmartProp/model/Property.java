@@ -7,38 +7,81 @@ import jakarta.persistence.Id;
 
 @Entity
 public class Property {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String address;
+
     private String description;
+
     private double rentAmount;
+
     private String landlordUsername;
 
-    // *** שדות חדשים שחסרו ***
+    // האם הדירה מושכרת (עם אתחול ברירת מחדל)
     private boolean isRented = false;
+
+    // שם השוכר
     private String tenant;
 
-    // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    // ===== GETTERS & SETTERS =====
 
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public void setId(Long id) {
+        // שורה זו נחוצה במידה ו-Hibernate צריך להזריק מזהה ידנית
+        this.id = id;
+    }
 
-    public double getRentAmount() { return rentAmount; }
-    public void setRentAmount(double rentAmount) { this.rentAmount = rentAmount; }
+    public String getAddress() {
+        return address;
+    }
 
-    public String getLandlordUsername() { return landlordUsername; }
-    public void setLandlordUsername(String landlordUsername) { this.landlordUsername = landlordUsername; }
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
-    public boolean isRented() { return isRented; }
-    public void setRented(boolean rented) { isRented = rented; }
+    public String getDescription() {
+        return description;
+    }
 
-    public String getTenant() { return tenant; }
-    public void setTenant(String tenant) { this.tenant = tenant; }
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public double getRentAmount() {
+        return rentAmount;
+    }
+
+    public void setRentAmount(double rentAmount) {
+        this.rentAmount = rentAmount;
+    }
+
+    public String getLandlordUsername() {
+        return landlordUsername;
+    }
+
+    public void setLandlordUsername(String landlordUsername) {
+        this.landlordUsername = landlordUsername;
+    }
+
+    public boolean isRented() {
+        return isRented;
+    }
+
+    public void setRented(boolean rented) {
+        isRented = rented;
+    }
+
+    public String getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(String tenant) {
+        this.tenant = tenant;
+    }
 }

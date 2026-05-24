@@ -5,9 +5,11 @@ import com.example.SmartProp.repository.LandlordRepository;
 import com.example.SmartProp.repository.PaymentRepository;
 import com.example.SmartProp.service.ElectricityService;
 import com.example.SmartProp.service.VisionService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
@@ -29,6 +31,10 @@ public class ElectricityController {
     @Autowired
     private LandlordRepository landlordRepository;
 
+
+    // ============================
+    // חישוב רגיל
+    // ============================
     @GetMapping("/calculate")
     public String calculate(
             @RequestParam String username,
@@ -37,9 +43,19 @@ public class ElectricityController {
             @RequestParam boolean updateRate,
             @RequestParam(required = false) Long propertyId) {
 
-        return electricityService.calculateAndSaveBill(username, current, rate, updateRate, propertyId);
+        return electricityService.calculateAndSaveBill(
+                username,
+                current,
+                rate,
+                updateRate,
+                propertyId
+        );
     }
 
+
+    // ============================
+    // חישוב מתוך תמונה (עם התיקון העשרוני שלך)
+    // ============================
     @PostMapping("/calculate-from-image")
     public String calculateFromImage(
             @RequestParam String username,
@@ -49,10 +65,12 @@ public class ElectricityController {
             @RequestParam("image") MultipartFile imageFile) {
 
         try {
+            // שליפת הקריאה הקודמת לפי הלוגיקה שלך
             double previousReading = electricityService.getPreviousReadingForTenant(username);
 
             String base64Image = Base64.getEncoder().encodeToString(imageFile.getBytes());
 
+            // שימוש בסרוויס המשופר שמתחשב בקריאה הקודמת
             String extractedText = visionService.extractTextFromImage(base64Image, previousReading);
 
             if (extractedText == null || extractedText.isEmpty() || extractedText.equals(".")) {
@@ -61,6 +79,7 @@ public class ElectricityController {
 
             double currentReading = Double.parseDouble(extractedText);
 
+            // בדיקת קיומה של נקודה עשרונית וחלוקה ב-10 במידת הצורך
             if (!extractedText.contains(".")) {
                 currentReading = currentReading / 10.0;
             }
@@ -72,7 +91,10 @@ public class ElectricityController {
         }
     }
 
-    // *** ENDPOINTS חדשים לניהול מחיר החשמל לפי משכיר ***
+
+    // ============================
+    // ENDPOINTS לניהול מחיר החשמל לפי משכיר ספציפי
+    // ============================
 
     @GetMapping("/price/{username}")
     public Map<String, Object> getElectricityPrice(@PathVariable String username) {
@@ -101,7 +123,10 @@ public class ElectricityController {
         }
     }
 
+
+    // ============================
     // אישור תשלום על ידי המשכיר
+    // ============================
     @PutMapping("/approve/{id}")
     public String approvePayment(@PathVariable Long id) {
         return paymentRepository.findById(id).map(payment -> {

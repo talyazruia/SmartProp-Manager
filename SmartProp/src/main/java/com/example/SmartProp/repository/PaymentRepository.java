@@ -11,9 +11,12 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     // מחזיר את כל היסטוריית התשלומים של שוכר מסוים
     List<Payment> findByTenantUsername(String tenantUsername);
 
-    // מוצא את התשלום הכי עדכני של השוכר לפי ה-ID הכי גבוה (האחרון באמת שנכנס)
+    // מחזיר את כל התשלומים המשויכים לנכס מסוים
+    List<Payment> findByPropertyId(Long propertyId);
+
+    // מוצא את התשלום הכי עדכני של השוכר לפי ה-ID הכי גבוה (האחרון שנכנס - לטובת משיכת קריאה קודמת)
     Payment findFirstByTenantUsernameOrderByIdDesc(String tenantUsername);
 
-    // מתודת נוחות חדשה: מחזיר את כל התשלומים של שוכר מסוים שעדיין מחכים לאישור המשכיר
+    // מחזיר את כל התשלומים של שוכר מסוים שעדיין מחכים לאישור המשכיר
     List<Payment> findByTenantUsernameAndIsApprovedFalse(String tenantUsername);
 }
