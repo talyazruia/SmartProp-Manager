@@ -10,11 +10,15 @@ public class Property {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     private String address;
     private String description;
     private double rentAmount;
     private String landlordUsername;
+
+    // *** שדות חדשים שחסרו ***
+    private boolean isRented = false;
+    private String tenant;
 
     // Getters and Setters
     public Long getId() { return id; }
@@ -31,4 +35,10 @@ public class Property {
 
     public String getLandlordUsername() { return landlordUsername; }
     public void setLandlordUsername(String landlordUsername) { this.landlordUsername = landlordUsername; }
+
+    public boolean isRented() { return isRented; }
+    public void setRented(boolean rented) { isRented = rented; }
+
+    public String getTenant() { return tenant; }
+    public void setTenant(String tenant) { this.tenant = tenant; }
 }

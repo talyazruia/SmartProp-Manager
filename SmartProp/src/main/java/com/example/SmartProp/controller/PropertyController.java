@@ -17,7 +17,6 @@ public class PropertyController {
     @Autowired
     private PropertyRepository propertyRepository;
 
-    // 1. הוספת דירה חדשה למערכת
     @PostMapping("/add")
     public Map<String, String> addProperty(@RequestBody Property property) {
         try {
@@ -28,29 +27,24 @@ public class PropertyController {
         }
     }
 
-    // 2. משיכת כל הדירות של משכיר ספציפי (לפי שם משתמש)
     @GetMapping("/landlord/{username}")
     public List<Property> getPropertiesByLandlord(@PathVariable String username) {
         return propertyRepository.findByLandlordUsername(username);
     }
 
-    // 3. משיכת כל הדירות הקיימות במערכת (למשל עבור חיפוש שוכרים)
     @GetMapping("/all")
     public List<Property> getAllProperties() {
         return propertyRepository.findAll();
     }
 
-    // 4. עדכון פרטי דירה קיימת (או שיוך שוכר)
     @PutMapping("/update/{id}")
     public Map<String, String> updateProperty(@PathVariable Long id, @RequestBody Property propertyDetails) {
         Optional<Property> optionalProperty = propertyRepository.findById(id);
-        
         if (optionalProperty.isPresent()) {
             Property property = optionalProperty.get();
             property.setAddress(propertyDetails.getAddress());
             property.setRentAmount(propertyDetails.getRentAmount());
             property.setLandlordUsername(propertyDetails.getLandlordUsername());
-            
             propertyRepository.save(property);
             return Map.of("status", "success", "message", "פרטי הדירה עודכנו בהצלחה");
         } else {
@@ -58,7 +52,6 @@ public class PropertyController {
         }
     }
 
-    // 5. מחיקת דירה מהמערכת
     @DeleteMapping("/delete/{id}")
     public Map<String, String> deleteProperty(@PathVariable Long id) {
         try {
@@ -70,6 +63,23 @@ public class PropertyController {
             }
         } catch (Exception e) {
             return Map.of("status", "error", "message", "שגיאה במחיקת הדירה: " + e.getMessage());
+        }
+    }
+
+    // *** תוקן: endpoint לעדכון דירה כמושכרת עם שם השוכר ***
+    @PutMapping("/{id}/rent")
+    public Map<String, String> rentProperty(
+            @PathVariable Long id,
+            @RequestParam String tenantName) {
+        Optional<Property> optionalProperty = propertyRepository.findById(id);
+        if (optionalProperty.isPresent()) {
+            Property property = optionalProperty.get();
+            property.setRented(true);
+            property.setTenant(tenantName);
+            propertyRepository.save(property);
+            return Map.of("status", "success", "message", "הדירה עודכנה כמושכרת");
+        } else {
+            return Map.of("status", "error", "message", "הדירה לא נמצאה");
         }
     }
 }

@@ -1,12 +1,16 @@
 package com.example.SmartProp.controller;
 
+import com.example.SmartProp.model.Landlord;
+import com.example.SmartProp.repository.LandlordRepository;
+import com.example.SmartProp.repository.PaymentRepository;
 import com.example.SmartProp.service.ElectricityService;
 import com.example.SmartProp.service.VisionService;
-import com.example.SmartProp.repository.PaymentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.Base64;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/electricity")
@@ -21,6 +25,9 @@ public class ElectricityController {
 
     @Autowired
     private PaymentRepository paymentRepository;
+
+    @Autowired
+    private LandlordRepository landlordRepository;
 
     @GetMapping("/calculate")
     public String calculate(
@@ -42,28 +49,22 @@ public class ElectricityController {
             @RequestParam("image") MultipartFile imageFile) {
 
         try {
-            // 1. שליפת הקריאה הקודמת מה-Database לפי מזהה ID יורד
             double previousReading = electricityService.getPreviousReadingForTenant(username);
 
-            // 2. המרת התמונה ל-Base64
             String base64Image = Base64.getEncoder().encodeToString(imageFile.getBytes());
-            
-            // 3. שליחת התמונה ל-VisionService
+
             String extractedText = visionService.extractTextFromImage(base64Image, previousReading);
 
-            // 4. בדיקה אם ה-API חילץ מועמד תקין
             if (extractedText == null || extractedText.isEmpty() || extractedText.equals(".")) {
                 return "לא הצלחנו לזהות את הספרות במונה. אנא העלה תמונה חדשה ברורה יותר.";
             }
 
-            // 5. המרה ל-double תוך בדיקה דינמית של סוג המונה (מכני/דיגיטלי)
             double currentReading = Double.parseDouble(extractedText);
 
             if (!extractedText.contains(".")) {
                 currentReading = currentReading / 10.0;
             }
 
-            // 6. הרצת לוגיקת החישוב והשמירה
             return electricityService.calculateAndSaveBill(username, currentReading, rate, updateRate, propertyId);
 
         } catch (Exception e) {
@@ -71,7 +72,36 @@ public class ElectricityController {
         }
     }
 
-    // ה-Endpoint החדש: מאפשר למשכיר לאשר תשלום ספציפי לפי ה-ID שלו
+    // *** ENDPOINTS חדשים לניהול מחיר החשמל לפי משכיר ***
+
+    @GetMapping("/price/{username}")
+    public Map<String, Object> getElectricityPrice(@PathVariable String username) {
+        Optional<Landlord> landlord = landlordRepository.findById(username);
+        double rate = landlord.map(Landlord::getElectricityRate).orElse(0.6);
+        return Map.of("settingValue", rate);
+    }
+
+    @PutMapping("/price/{username}")
+    public Map<String, String> updateElectricityPrice(
+            @PathVariable String username,
+            @RequestBody Map<String, Object> body) {
+        try {
+            double newRate = Double.parseDouble(body.get("settingValue").toString());
+            Optional<Landlord> landlordOptional = landlordRepository.findById(username);
+            if (landlordOptional.isPresent()) {
+                Landlord landlord = landlordOptional.get();
+                landlord.setElectricityRate(newRate);
+                landlordRepository.save(landlord);
+                return Map.of("status", "success", "message", "מחיר החשמל עודכן בהצלחה");
+            } else {
+                return Map.of("status", "error", "message", "משכיר לא נמצא");
+            }
+        } catch (Exception e) {
+            return Map.of("status", "error", "message", "שגיאה בעדכון: " + e.getMessage());
+        }
+    }
+
+    // אישור תשלום על ידי המשכיר
     @PutMapping("/approve/{id}")
     public String approvePayment(@PathVariable Long id) {
         return paymentRepository.findById(id).map(payment -> {
