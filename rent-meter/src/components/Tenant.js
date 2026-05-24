@@ -1,67 +1,36 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React from "react";
+import axios from "axios"; 
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
+const LOGO_BLUE = "#1a5f9e";
+
+const styles = {
+  container: { padding: "20px", maxWidth: "500px", margin: "40px auto", fontFamily: "sans-serif", direction: "rtl", textAlign: "right" },
+  title: { color: "#2c3e50", borderBottom: `2px solid ${LOGO_BLUE}`, paddingBottom: "10px", marginBottom: "20px" },
+  pageContainer: { padding: "30px", borderRadius: "8px", border: "1px solid #ddd", backgroundColor: "#fff", boxShadow: "0 4px 6px rgba(0,0,0,0.05)", borderTop: `4px solid ${LOGO_BLUE}` },
+  inputField: { display: "block", padding: "10px", width: "100%", marginBottom: "5px", borderRadius: "4px", border: "1px solid #ddd", boxSizing: "border-box", fontSize: "14px" },
+  label: { display: "block", marginBottom: "5px", fontWeight: "bold", color: "#555", fontSize: "14px", marginTop: "10px" },
+  errorText: { color: "#c62828", fontSize: "12px", marginBottom: "10px", fontWeight: "bold" },
+  btnSubmit: { width: "100%", padding: "12px", backgroundColor: "#2e7d32", color: "white", border: "none", borderRadius: "4px", cursor: "pointer", fontSize: "16px", fontWeight: "bold", marginTop: "15px", boxShadow: "0 2px 4px rgba(0,0,0,0.1)" },
+  backBtn: { backgroundColor: "#546e7a", color: "white", padding: "10px 20px", border: "none", borderRadius: "4px", cursor: "pointer", marginBottom: "20px", fontSize: "14px", fontWeight: "bold" }
+};
+
 const Tenant = ({ setScreen, setUser }) => {
-  const [landlords, setLandlords] = useState([]);
-  const [apartments, setApartments] = useState([]);
-  const [loadingApartments, setLoadingApartments] = useState(false);
-
-  useEffect(() => {
-    const fetchLandlords = async () => {
-      try {
-        const res = await axios.get("http://127.0.0.1:8081/api/landlords");
-        setLandlords(res.data || []);
-      } catch (err) {
-        console.error("שגיאה בטעינת משכירים", err);
-      }
-    };
-    fetchLandlords();
-  }, []);
-
-  const fetchApartments = async (username) => {
-    if (!username) return;
-    setLoadingApartments(true);
-    try {
-      const res = await axios.get(
-        `http://127.0.0.1:8081/api/properties/landlord/${username}`
-      );
-      const available = (res.data || []).filter((a) => !a.rented);
-      setApartments(available);
-    } catch (err) {
-      console.error("שגיאה בטעינת דירות", err);
-      setApartments([]);
-    } finally {
-      setLoadingApartments(false);
-    }
-  };
 
   const formik = useFormik({
-    initialValues: {
-      firstName: "",
-      lastName: "",
-      phone: "",
-      email: "",
-      landlordId: "",
-      apartmentId: "",
-      username: "",
-      password: "",
-    },
-
+    initialValues: { firstName: "", lastName: "", phone: "", email: "", username: "", password: "" },
     validationSchema: Yup.object({
-      firstName: Yup.string().required("חובה"),
-      lastName: Yup.string().required("חובה"),
-      phone: Yup.string().required("חובה"),
-      email: Yup.string().email("מייל לא תקין").required("חובה"),
-      landlordId: Yup.string().required("בחר משכיר"),
-      apartmentId: Yup.string().required("בחר דירה"),
-      username: Yup.string().required("חובה"),
-      password: Yup.string().required("חובה"),
+      firstName: Yup.string().required("שדה חובה *"),
+      lastName: Yup.string().required("שדה חובה *"),
+      phone: Yup.string().required("שדה חובה *"),
+      email: Yup.string().email("כתובת מייל לא תקינה").required("שדה חובה *"),
+      username: Yup.string().required("שדה חובה *"),
+      password: Yup.string().required("שדה חובה *"),
     }),
-
     onSubmit: async (values) => {
       try {
+        // ברישום ראשוני השדות של הדירה והמשכיר מתחילים כ-null (המשכיר ישייך אותם אחר כך)
         const payload = {
           firstName: values.firstName,
           lastName: values.lastName,
@@ -69,11 +38,11 @@ const Tenant = ({ setScreen, setUser }) => {
           email: values.email,
           username: values.username,
           password: values.password,
-          landlordId: values.landlordId,
-          apartmentId: values.apartmentId ? String(values.apartmentId) : null,
+          landlordId: null,
+          apartmentId: null,
         };
 
-        // *** התיקון: שינוי הכתובת לנתיב הרישום הנכון ב-AuthController ***
+        // רישום השוכר בשרת
         const res = await axios.post("http://127.0.0.1:8081/api/auth/register/tenant", payload);
 
         if (res.data.status === "error") {
@@ -81,25 +50,11 @@ const Tenant = ({ setScreen, setUser }) => {
           return;
         }
 
-        try {
-          await axios.put(
-            `http://127.0.0.1:8081/api/properties/${values.apartmentId}/rent`,
-            null,
-            {
-              params: {
-                tenantName: `${values.firstName} ${values.lastName}`,
-              },
-            }
-          );
-        } catch (err) {
-          console.warn("לא הצלחנו לעדכן דירה אבל השוכר נשמר:", err);
-        }
-
         setUser({
           username: values.username,
           name: `${values.firstName} ${values.lastName}`,
           type: "tenant",
-          apartmentId: values.apartmentId,
+          apartmentId: null, // מתחיל ריק
         });
 
         setScreen("tenantDetails");
@@ -112,124 +67,39 @@ const Tenant = ({ setScreen, setUser }) => {
   });
 
   return (
-    <div style={{ maxWidth: "400px", margin: "auto", direction: "rtl" }}>
-      <h2>יצירת שוכר</h2>
+    <div style={styles.container}>
+      <button style={styles.backBtn} onClick={() => setScreen("login")}>⬅ חזרה למסך הבית</button>
+      <div style={styles.pageContainer}>
+        <h2 style={styles.title}>הרשמת שוכר חדש</h2>
+        <form onSubmit={formik.handleSubmit}>
+          
+          <label style={styles.label}>שם פרטי:</label>
+          <input name="firstName" onChange={formik.handleChange} onBlur={formik.handleBlur} value={formik.values.firstName} style={styles.inputField} />
+          <div style={styles.errorText}>{formik.touched.firstName && formik.errors.firstName}</div>
 
-      <form onSubmit={formik.handleSubmit}>
-        <input
-          name="firstName"
-          placeholder="שם"
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          value={formik.values.firstName}
-        />
-        <div style={{ color: "red" }}>
-          {formik.touched.firstName && formik.errors.firstName}
-        </div>
+          <label style={styles.label}>שם משפחה:</label>
+          <input name="lastName" onChange={formik.handleChange} onBlur={formik.handleBlur} value={formik.values.lastName} style={styles.inputField} />
+          <div style={styles.errorText}>{formik.touched.lastName && formik.errors.lastName}</div>
 
-        <input
-          name="lastName"
-          placeholder="שם משפחה"
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          value={formik.values.lastName}
-        />
-        <div style={{ color: "red" }}>
-          {formik.touched.lastName && formik.errors.lastName}
-        </div>
+          <label style={styles.label}>מספר טלפון:</label>
+          <input name="phone" onChange={formik.handleChange} onBlur={formik.handleBlur} value={formik.values.phone} style={styles.inputField} />
+          <div style={styles.errorText}>{formik.touched.phone && formik.errors.phone}</div>
 
-        <input
-          name="phone"
-          placeholder="טלפון"
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          value={formik.values.phone}
-        />
-        <div style={{ color: "red" }}>
-          {formik.touched.phone && formik.errors.phone}
-        </div>
+          <label style={styles.label}>כתובת אימייל:</label>
+          <input name="email" onChange={formik.handleChange} onBlur={formik.handleBlur} value={formik.values.email} style={styles.inputField} />
+          <div style={styles.errorText}>{formik.touched.email && formik.errors.email}</div>
 
-        <input
-          name="email"
-          placeholder="מייל"
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          value={formik.values.email}
-        />
-        <div style={{ color: "red" }}>
-          {formik.touched.email && formik.errors.email}
-        </div>
+          <label style={styles.label}>שם משתמש (עבור התחברות):</label>
+          <input name="username" onChange={formik.handleChange} onBlur={formik.handleBlur} value={formik.values.username} style={styles.inputField} />
+          <div style={styles.errorText}>{formik.touched.username && formik.errors.username}</div>
 
-        <select
-          name="landlordId"
-          value={formik.values.landlordId}
-          onBlur={formik.handleBlur}
-          onChange={(e) => {
-            formik.setFieldValue("landlordId", e.target.value);
-            formik.setFieldValue("apartmentId", "");
-            fetchApartments(e.target.value);
-          }}
-        >
-          <option value="">בחר משכיר</option>
-          {landlords.map((l) => (
-            <option key={l.username} value={l.username}>
-              {l.firstName} {l.lastName}
-            </option>
-          ))}
-        </select>
-        <div style={{ color: "red" }}>
-          {formik.touched.landlordId && formik.errors.landlordId}
-        </div>
+          <label style={styles.label}>סיסמה:</label>
+          <input type="password" name="password" onChange={formik.handleChange} onBlur={formik.handleBlur} value={formik.values.password} style={styles.inputField} />
+          <div style={styles.errorText}>{formik.touched.password && formik.errors.password}</div>
 
-        <select
-          name="apartmentId"
-          value={formik.values.apartmentId}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          disabled={!formik.values.landlordId || loadingApartments}
-        >
-          <option value="">
-            {loadingApartments ? "טוען..." : "בחר דירה"}
-          </option>
-          {apartments.length === 0 && formik.values.landlordId && !loadingApartments ? (
-            <option disabled value="">אין דירות פנויות</option>
-          ) : (
-            apartments.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.address}
-              </option>
-            ))
-          )}
-        </select>
-        <div style={{ color: "red" }}>
-          {formik.touched.apartmentId && formik.errors.apartmentId}
-        </div>
-
-        <input
-          name="username"
-          placeholder="שם משתמש"
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          value={formik.values.username}
-        />
-        <div style={{ color: "red" }}>
-          {formik.touched.username && formik.errors.username}
-        </div>
-
-        <input
-          type="password"
-          name="password"
-          placeholder="סיסמה"
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          value={formik.values.password}
-        />
-        <div style={{ color: "red" }}>
-          {formik.touched.password && formik.errors.password}
-        </div>
-
-        <button type="submit">שמור</button>
-      </form>
+          <button type="submit" style={styles.btnSubmit}>הרשם ושמור</button>
+        </form>
+      </div>
     </div>
   );
 };
