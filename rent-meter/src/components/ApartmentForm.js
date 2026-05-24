@@ -80,7 +80,6 @@ export default function ApartmentForm({
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // התאמה מלאה ל־Spring Property model שלך
     const property = {
       address: `${formData.street} ${formData.buildingNumber}, דירה ${formData.apartmentNumber}, ${formData.city}`,
       description: formData.description,
@@ -96,7 +95,6 @@ export default function ApartmentForm({
 
       console.log("Property saved:", res.data);
 
-      // לא חייבים לעדכן כאן - הדשבורד כבר טוען מהשרת
       setScreen("landlordDashboard");
 
     } catch (err) {

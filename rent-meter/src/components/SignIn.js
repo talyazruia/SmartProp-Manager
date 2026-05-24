@@ -7,7 +7,7 @@ export default function SignIn({ setScreen, setUser }) {
 
   const login = async () => {
     try {
-      const res = await axios.post("http://localhost:8081/api/auth/login", {
+      const res = await axios.post("http://127.0.0.1:8081/api/auth/login", {
         username,
         password,
       });

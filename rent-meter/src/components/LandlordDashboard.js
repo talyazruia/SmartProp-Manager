@@ -89,10 +89,11 @@ export default function LandlordDashboard({ setScreen, user }) {
     }
   };
 
+  // *** תוקן: הקריאה כוללת עכשיו את ה-username של המשכיר ***
   const fetchElectricityPrice = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:8081/api/electricity/price"
+        `http://localhost:8081/api/electricity/price/${user?.username}`
       );
 
       const currentPrice = res.data.settingValue || 0;
@@ -107,10 +108,11 @@ export default function LandlordDashboard({ setScreen, user }) {
     }
   };
 
+  // *** תוקן: הקריאה כוללת עכשיו את ה-username של המשכיר ***
   const updateElectricityPrice = async () => {
     try {
       await axios.put(
-        "http://localhost:8081/api/electricity/price",
+        `http://localhost:8081/api/electricity/price/${user?.username}`,
         {
           settingValue: Number(electricityPrice),
         }

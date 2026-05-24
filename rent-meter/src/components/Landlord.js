@@ -42,12 +42,18 @@ const Landlord = ({ setScreen, setUser }) => {
       console.log("Submitting values:", values);
 
       try {
+        // שליחת הבקשה לנתיב הרישום ב-AuthController
         const res = await axios.post(
-          "http://localhost:8081/api/landlords",
+          "http://127.0.0.1:8081/api/auth/register/landlord",
           values
         );
 
         console.log("Saved successfully:", res.data);
+
+        if (res.data.status === "error") {
+          alert(res.data.message);
+          return;
+        }
 
         setUser({
           username: values.username,

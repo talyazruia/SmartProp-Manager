@@ -89,7 +89,7 @@ export default function Upload({ setScreen, setReading, user }) {
     if (manualReading) {
       try {
         const res = await axios.get(
-          "http://localhost:8081/api/electricity/calculate", {
+          "http://127.0.0.1:8081/api/electricity/calculate", {
             params: {
               username: user.username,
               current: Number(manualReading),
@@ -115,7 +115,7 @@ export default function Upload({ setScreen, setReading, user }) {
         formData.append("updateRate", false);
         formData.append("propertyId", user.apartmentId);
         const res = await axios.post(
-          "http://localhost:8081/api/electricity/calculate-from-image",
+          "http://127.0.0.1:8081/api/electricity/calculate-from-image",
           formData
         );
         setReading(res.data);
