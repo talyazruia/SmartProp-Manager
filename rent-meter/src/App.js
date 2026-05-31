@@ -8,54 +8,13 @@ import Tenant from "./components/Tenant";
 import Landlord from "./components/Landlord";
 import Register from "./components/Register";
 import SignIn from "./components/SignIn";
+import Confirmation from "./components/Confirmation"; 
 
 function App() {
   const [screen, setScreen] = useState("login");
   const [role, setRole] = useState(null);
   const [reading, setReading] = useState(null);
   const [user, setUser] = useState(null);
-
-  const ConfirmationScreen = () => (
-    <div
-      style={{
-        textAlign: "center",
-        marginTop: "50px",
-        direction: "rtl",
-        fontFamily: "sans-serif",
-      }}
-    >
-      <h2 style={{ color: "#4CAF50" }}>הקריאה נשלחה בהצלחה!</h2>
-
-      <div
-        style={{
-          backgroundColor: "#f0f0f0",
-          padding: "20px",
-          borderRadius: "8px",
-          display: "inline-block",
-        }}
-      >
-        <p>המספר שזוהה במערכת:</p>
-        <h1 style={{ margin: "0" }}>{reading}</h1>
-      </div>
-
-      <br />
-      <br />
-
-      <button
-        style={{
-          padding: "12px 24px",
-          cursor: "pointer",
-          backgroundColor: "#2196F3",
-          color: "white",
-          border: "none",
-          borderRadius: "4px",
-        }}
-        onClick={() => setScreen("tenantDetails")}
-      >
-        חזרה לתפריט הראשי
-      </button>
-    </div>
-  );
 
   return (
     <div className="App">
@@ -107,7 +66,13 @@ function App() {
       )}
 
       {/* confirmation */}
-      {screen === "confirmation" && <ConfirmationScreen />}
+      {screen === "confirmation" && (
+        <Confirmation 
+          setScreen={setScreen} 
+          reading={reading} 
+          user={user} 
+        />
+      )}
 
       {/* landlord */}
       {screen === "landlord" && (

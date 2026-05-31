@@ -13,7 +13,7 @@ const styles = {
     fontFamily: "sans-serif",
     direction: "rtl",
     textAlign: "right",
-    height: "80vh",
+    height: "85vh",
     boxSizing: "border-box",
     display: "flex",
     flexDirection: "column",
@@ -36,7 +36,7 @@ const styles = {
     flex: 1,
     display: "flex",
     flexDirection: "column",
-    justifyContent: "flex-start",
+    justify: "flex-start",
   },
   form: {
     display: "flex",
@@ -98,7 +98,13 @@ const styles = {
 
 export default function ApartmentForm({ setScreen, setApartments, user }) {
   const [formData, setFormData] = useState({
-    city: "", street: "", buildingNumber: "", apartmentNumber: "", description: "", price: "",
+    city: "", 
+    street: "", 
+    buildingNumber: "", 
+    apartmentNumber: "", 
+    description: "", 
+    price: "",
+    initialMeterReading: "0", // ◄ ברירת מחדל 0
   });
 
   const handleChange = (e) => {
@@ -108,21 +114,34 @@ export default function ApartmentForm({ setScreen, setApartments, user }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const property = {
-      address: `${formData.street} ${formData.buildingNumber}, דירה ${formData.apartmentNumber}, ${formData.city}`,
+
+    const calculatedLandlord = user?.username || user?.email || user?.id;
+
+    // בניית ה-payload המאוחד
+    const payload = {
+      address: `${formData.street} ${formData.buildingNumber}, דירה ${formData.apartmentNumber || 0}, ${formData.city}`,
       description: formData.description,
       rentAmount: Number(formData.price),
-      landlordUsername: user?.username,
+      landlordUsername: calculatedLandlord,
+      
+      // ◄ אם המשתמש השאיר ריק או מחק, ישלח 0
+      initialMeterReading: formData.initialMeterReading ? Number(formData.initialMeterReading) : 0
     };
 
+    if (!calculatedLandlord) {
+      alert("שגיאה: לא נמצא מזהה משתמש מחובר.");
+      return;
+    }
+
     try {
-      const res = await axios.post("http://localhost:8081/api/properties/add", property);
-      console.log("Property saved:", res.data);
-      alert("הדירה נשמרה בהצלחה! ✔️");
+      const res = await axios.post("http://localhost:8081/api/properties/add", payload);
+      
+      console.log("Response from server:", res.data);
+      alert("הדירה נוספה בהצלחה, וקריאת המונה אושרה! ✔️");
       setScreen("landlordDashboard");
     } catch (err) {
       console.error("Error saving property:", err);
-      alert("שגיאה בשמירת דירה ❗");
+      alert("שגיאה בשמירת דירה. בדוק את ה-Console.");
     }
   };
 
@@ -152,10 +171,23 @@ export default function ApartmentForm({ setScreen, setApartments, user }) {
             <label style={styles.label}>שכר דירה (₪)</label>
             <input style={styles.input} type="number" name="price" value={formData.price} onChange={handleChange} required />
           </div>
+          
+          <div style={styles.formGroup}>
+            <label style={styles.label}>קריאת מונה התחלתית</label>
+            <input 
+              style={styles.input} 
+              type="number" 
+              name="initialMeterReading" 
+              value={formData.initialMeterReading} 
+              onChange={handleChange} 
+            />
+          </div>
+
           <div style={styles.formGroup}>
             <label style={styles.label}>תיאור הדירה</label>
             <textarea style={styles.textarea} name="description" value={formData.description} onChange={handleChange} />
           </div>
+          
           <div style={{ marginTop: "12px", display: "flex", gap: "10px" }}>
             <button type="submit" style={{ ...styles.btn, backgroundColor: "#2e7d32", color: "white" }}>שמור דירה</button>
             <button type="button" style={{ ...styles.btn, backgroundColor: "#c62828", color: "white" }} onClick={() => setScreen("landlordDashboard")}>ביטול</button>

@@ -8,133 +8,171 @@ const LOGO_GOLD = "#f2b819";
 const TEXT_DARK = "#2c3e50";
 
 const styles = {
-  container: {
-    padding: "20px",
-    maxWidth: "1100px",
-    margin: "0 auto",
-    fontFamily: "sans-serif",
-    direction: "rtl",
-    textAlign: "right",
+  container: { 
+    padding: "20px", 
+    maxWidth: "1100px", 
+    margin: "0 auto", 
+    fontFamily: "sans-serif", 
+    direction: "rtl", 
+    textAlign: "right" 
   },
-  title: {
-    color: TEXT_DARK,
-    borderBottom: `2px solid ${LOGO_BLUE}`,
-    paddingBottom: "10px",
-    marginBottom: "20px"
+  title: { 
+    color: TEXT_DARK, 
+    borderBottom: `2px solid ${LOGO_BLUE}`, 
+    paddingBottom: "10px", 
+    marginBottom: "20px" 
   },
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-    marginTop: "20px",
-    backgroundColor: "white",
-    boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
+  table: { 
+    width: "100%", 
+    borderCollapse: "collapse", 
+    marginTop: "20px", 
+    backgroundColor: "white", 
+    boxShadow: "0 2px 5px rgba(0,0,0,0.1)" 
   },
-  th: {
-    backgroundColor: LOGO_BLUE,
-    color: "white",
-    padding: "12px",
-    textAlign: "right",
+  th: { 
+    backgroundColor: LOGO_BLUE, 
+    color: "white", 
+    padding: "12px", 
+    textAlign: "right" 
   },
-  td: {
-    padding: "12px",
-    borderBottom: "1px solid #ddd",
-    verticalAlign: "middle",
+  td: { 
+    padding: "12px", 
+    borderBottom: "1px solid #ddd", 
+    verticalAlign: "middle" 
   },
-  badge: {
-    padding: "5px 10px",
-    borderRadius: "15px",
-    fontSize: "12px",
-    fontWeight: "bold",
-    color: "white",
+  badge: { 
+    padding: "5px 10px", 
+    borderRadius: "15px", 
+    fontSize: "12px", 
+    fontWeight: "bold", 
+    color: "white" 
   },
-  btn: {
-    border: "none",
-    padding: "10px 18px",
-    borderRadius: "4px",
-    cursor: "pointer",
-    fontSize: "14px",
-    fontWeight: "bold",
-    transition: "background-color 0.2s",
+  btn: { 
+    border: "none", 
+    padding: "10px 18px", 
+    borderRadius: "4px", 
+    cursor: "pointer", 
+    fontSize: "14px", 
+    fontWeight: "bold", 
+    transition: "background-color 0.2s" 
   },
-  actionBtn: {
-    border: "none",
-    padding: "8px 0",
-    width: "90px",
-    borderRadius: "4px",
-    cursor: "pointer",
-    marginLeft: "8px",
-    fontSize: "13px",
-    textAlign: "center",
-    display: "inline-block",
-    fontWeight: "bold",
-    boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+  actionBtn: { 
+    border: "none", 
+    padding: "8px 0", 
+    width: "90px", 
+    borderRadius: "4px", 
+    cursor: "pointer", 
+    marginLeft: "8px", 
+    fontSize: "13px", 
+    textAlign: "center", 
+    display: "inline-block", 
+    fontWeight: "bold", 
+    boxShadow: "0 1px 3px rgba(0,0,0,0.1)" 
   },
-  backBtn: {
-    backgroundColor: "#546e7a",
-    color: "white",
-    padding: "10px 20px",
-    border: "none",
-    borderRadius: "4px",
-    cursor: "pointer",
-    marginBottom: "20px",
-    fontSize: "14px",
-    fontWeight: "bold"
+  backBtn: { 
+    backgroundColor: "#546e7a", 
+    color: "white", 
+    padding: "10px 20px", 
+    border: "none", 
+    borderRadius: "4px", 
+    cursor: "pointer", 
+    marginBottom: "20px", 
+    fontSize: "14px", 
+    fontWeight: "bold" 
   },
-  pageContainer: {
-    marginTop: "20px",
-    padding: "30px",
-    borderRadius: "8px",
-    border: "1px solid #ddd",
-    backgroundColor: "#fff",
-    boxShadow: "0 4px 6px rgba(0,0,0,0.05)",
+  pageContainer: { 
+    marginTop: "20px", 
+    padding: "30px", 
+    borderRadius: "8px", 
+    border: "1px solid #ddd", 
+    backgroundColor: "#fff", 
+    boxShadow: "0 4px 6px rgba(0,0,0,0.05)" 
   },
-  inputField: {
-    display: "block",
-    padding: "10px",
-    width: "100%",
-    maxWidth: "400px",
-    marginBottom: "15px",
-    borderRadius: "4px",
-    border: "1px solid #ddd",
-    boxSizing: "border-box",
+  inputField: { 
+    display: "block", 
+    padding: "10px", 
+    width: "100%", 
+    maxWidth: "400px", 
+    marginBottom: "15px", 
+    borderRadius: "4px", 
+    border: "1px solid #ddd", 
+    boxSizing: "border-box" 
   },
-  label: {
-    display: "block",
-    marginBottom: "5px",
-    fontWeight: "bold",
+  label: { 
+    display: "block", 
+    marginBottom: "5px", 
+    fontWeight: "bold" 
+  },
+  alertBox: { 
+    backgroundColor: "#fff3cd", 
+    borderRight: "6px solid #ffc107", 
+    padding: "15px", borderRadius: "6px", 
+    marginBottom: "20px", display: "flex", 
+    justifyContent: "space-between", 
+    alignItems: "center", 
+    boxShadow: "0 2px 4px rgba(0,0,0,0.05)" 
   }
 };
 
 export default function LandlordDashboard({ setScreen, user }) {
   const [apartments, setApartments] = useState([]);
+  const [pendingPayments, setPendingPayments] = useState([]); // שומר את התשלומים שממתינים לאישור
   const [view, setView] = useState("main");
   const [selectedApt, setSelectedApt] = useState(null);
   const [paymentHistory, setPaymentHistory] = useState([]);
-
   const [electricityPrice, setElectricityPrice] = useState("");
   const [previousElectricityPrice, setPreviousElectricityPrice] = useState("");
-
-  const [paymentDetails, setPaymentDetails] = useState({
-    bankAccountNumber: "",
-    bankBranch: "",
-    bankName: ""
-  });
-
+  const [paymentDetails, setPaymentDetails] = useState({ bankAccountNumber: "", bankBranch: "", bankName: "", bitPhoneNumber: "" });
   const [rentingAptId, setRentingAptId] = useState(null);
-  const [tenantNameInput, setTenantNameInput] = useState("");
+  const [tenantEmailInput, setTenantEmailInput] = useState("");
 
   const fetchApartments = async () => {
     try {
       const res = await axios.get(`http://localhost:8081/api/properties/landlord/${user?.username}`);
-      setApartments(res.data || []);
+      const apts = res.data || [];
+      setApartments(apts);
+      
+      // לאחר טעינת הדירות, נמשוך תשלומים שמחכים לאישור עבור כל דירה
+      fetchPendingPayments(apts);
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  // פונקציה לשליפת תשלומים שמחכים לאישור המשכיר
+  const fetchPendingPayments = async (apts) => {
+    try {
+      let allPending = [];
+      for (let apt of apts) {
+        const res = await axios.get(`http://localhost:8081/api/payments/pending/${apt.id}`);
+        if (res.data && res.data.length > 0) {
+          // נוסיף לכל תשלום גם את כתובת הדירה כדי שהמשכיר ידע איפה זה
+          const paymentsWithAddress = res.data.map(p => ({ ...p, address: apt.address }));
+          allPending = [...allPending, ...paymentsWithAddress];
+        }
+      }
+      setPendingPayments(allPending);
+    } catch (err) {
+      console.error("שגיאה בטעינת תשלומים ממתינים", err);
     }
   };
 
   useEffect(() => {
     if (user?.username) fetchApartments();
   }, [user]);
+
+  // פונקציית האישור בפועל - משנה את הסטטוס ל-1
+  const handleApprovePayment = async (paymentId) => {
+    try {
+      await axios.put(`http://localhost:8081/api/payments/${paymentId}/approve`);
+      alert("התשלום אושר בהצלחה והסטטוס עודכן ל'שולם'! ✔️");
+      // רענון הנתונים
+      fetchApartments();
+    } catch (err) {
+      alert("שגיאה באישור התשלום");
+      console.error(err);
+    }
+  };
 
   const isAptRented = (apt) => apt && apt.rented === true && apt.tenant && apt.tenant !== "null";
 
@@ -144,9 +182,9 @@ export default function LandlordDashboard({ setScreen, user }) {
       "סכום": Number(pay.amount || 0).toFixed(2) + " ₪",
       "קריאת מונה": pay.meterReading,
       "צריכה בקוט״ש": Number(pay.consumptionKwh || 0).toFixed(2),
-      "שם שוכר": pay.tenantUsername
+      "שם שוכר": pay.tenantUsername,
+      "סטטוס": pay.approved ? "אושר" : "ממתין לאישור"
     }));
-
     const ws = XLSX.utils.json_to_sheet(dataToExport);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "היסטוריית תשלומים");
@@ -157,22 +195,17 @@ export default function LandlordDashboard({ setScreen, user }) {
     try {
       const res = await axios.get(`http://localhost:8081/api/electricity/price/${user?.username}`);
       const currentPrice = res.data.settingValue || 0;
-
       setPreviousElectricityPrice(currentPrice);
       setElectricityPrice(currentPrice);
       setView("electricity");
     } catch (err) {
-      console.error("שגיאה בטעינת מחיר החשמל", err);
       alert("שגיאה בטעינת מחיר החשמל ❗");
     }
   };
 
   const updateElectricityPrice = async () => {
     try {
-      await axios.put(`http://localhost:8081/api/electricity/price/${user?.username}`, {
-        settingValue: Number(electricityPrice),
-      });
-
+      await axios.put(`http://localhost:8081/api/electricity/price/${user?.username}`, { settingValue: Number(electricityPrice) });
       alert("מחיר חשמל עודכן בהצלחה! ✔️");
       setView("main");
     } catch (err) {
@@ -183,15 +216,14 @@ export default function LandlordDashboard({ setScreen, user }) {
   const handleGoToPaymentDetails = async () => {
     try {
       const res = await axios.get(`http://localhost:8081/api/landlords/${user.username}`);
-
       if (res.data) {
         setPaymentDetails({
           bankAccountNumber: res.data.bankAccountNumber || "",
           bankBranch: res.data.bankBranch || "",
-          bankName: res.data.bankName || ""
+          bankName: res.data.bankName || "",
+          bitPhoneNumber: res.data.bitPhoneNumber || ""
         });
       }
-
       setView("paymentDetails");
     } catch (err) {
       setView("paymentDetails");
@@ -201,7 +233,7 @@ export default function LandlordDashboard({ setScreen, user }) {
   const updatePaymentDetails = async () => {
     try {
       await axios.put(`http://localhost:8081/api/landlords/${user.username}/payment-details`, paymentDetails);
-      alert("פרטי בנק עודכנו! ✔️");
+      alert("פרטי בנק וביט עודכנו! ✔️");
       setView("main");
     } catch (err) {
       alert("שגיאה בעדכון פרטים");
@@ -211,11 +243,7 @@ export default function LandlordDashboard({ setScreen, user }) {
   const handleShowHistory = async (apt) => {
     try {
       const res = await axios.get(`http://localhost:8081/api/payments/property/${apt.id}`);
-
-      const sortedHistory = (res.data || []).sort((a, b) => {
-        return new Date(b.date) - new Date(a.date);
-      });
-
+      const sortedHistory = (res.data || []).sort((a, b) => new Date(b.date) - new Date(a.date));
       setPaymentHistory(sortedHistory);
       setSelectedApt(apt);
       setView("history");
@@ -230,28 +258,40 @@ export default function LandlordDashboard({ setScreen, user }) {
   };
 
   const handleRentApartment = async (id) => {
+    if (!tenantEmailInput.trim()) {
+      alert("אנא הכנס כתובת אימייל ❗");
+      return;
+    }
     try {
-      await axios.put(`http://localhost:8081/api/properties/${id}/rent`, null, {
-        params: { tenantName: tenantNameInput },
-      });
-
+      const res = await axios.put(`http://localhost:8081/api/properties/${id}/rent`, null, { params: { tenantName: tenantEmailInput.trim() } });
+      if (res.data && res.data.status === "error") {
+        alert("השוכר לא נמצא במערכת ❗");
+        return;
+      }
       setRentingAptId(null);
-      setTenantNameInput("");
+      setTenantEmailInput("");
       fetchApartments();
-      alert("שוכר שויך בהצלחה!");
+      alert("שוכר שויך בהצלחה! ✔️");
     } catch (err) {
-      alert("שגיאה בשיוך שוכר");
+      alert("השוכר לא נמצא במערכת ❗");
+    }
+  };
+
+  const handleDeleteApartment = async (id) => {
+    if (!window.confirm("האם אתה בטוח שברצונך למחוק את הדירה? פעולה זו אינה הפיכה!")) return;
+    try {
+      await axios.delete(`http://localhost:8081/api/properties/delete/${id}`);
+      alert("הדירה נמחקה בהצלחה!");
+      fetchApartments();
+    } catch (err) {
+      alert("שגיאה במחיקת הדירה");
     }
   };
 
   const handleVacateApartment = async (id) => {
     if (!window.confirm("האם לפנות את השוכר מהדירה?")) return;
-
     try {
-      await axios.put(`http://localhost:8081/api/properties/${id}/rent`, null, {
-        params: { tenantName: "" },
-      });
-
+      await axios.put(`http://localhost:8081/api/properties/${id}/rent`, null, { params: { tenantName: "" } });
       fetchApartments();
       alert("הדירה פונתה בהצלחה!");
     } catch (err) {
@@ -264,17 +304,9 @@ export default function LandlordDashboard({ setScreen, user }) {
       <div style={styles.container}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <button style={styles.backBtn} onClick={() => setView("main")}>⬅ חזרה</button>
-
-          <button
-            style={{ ...styles.btn, backgroundColor: "#2e7d32", color: "white" }}
-            onClick={handleExportToExcel}
-          >
-            ייצא לאקסל
-          </button>
+          <button style={{ ...styles.btn, backgroundColor: "#2e7d32", color: "white" }} onClick={handleExportToExcel}>ייצא לאקסל</button>
         </div>
-
         <h2 style={styles.title}>היסטוריית תשלומים: {selectedApt?.address}</h2>
-
         <table style={styles.table}>
           <thead>
             <tr>
@@ -283,9 +315,9 @@ export default function LandlordDashboard({ setScreen, user }) {
               <th style={styles.th}>קריאת מונה</th>
               <th style={styles.th}>צריכה</th>
               <th style={styles.th}>שם שוכר</th>
+              <th style={styles.th}>סטטוס אישור</th>
             </tr>
           </thead>
-
           <tbody>
             {paymentHistory.length > 0 ? paymentHistory.map(pay => (
               <tr key={pay.id}>
@@ -294,13 +326,14 @@ export default function LandlordDashboard({ setScreen, user }) {
                 <td style={styles.td}>{pay.meterReading}</td>
                 <td style={styles.td}>{Number(pay.consumptionKwh || 0).toFixed(2)} קוט״ש</td>
                 <td style={styles.td}>{pay.tenantUsername}</td>
-              </tr>
-            )) : (
-              <tr>
-                <td colSpan="5" style={{ ...styles.td, textAlign: 'center' }}>
-                  אין היסטוריית תשלומים לנכס זה
+                <td style={styles.td}>
+                  <span style={{ ...styles.badge, backgroundColor: pay.approved ? "#2e7d32" : "#c62828" }}>
+                    {pay.approved ? "מאושר (1)" : "ממתין (0)"}
+                  </span>
                 </td>
               </tr>
+            )) : (
+              <tr><td colSpan="6" style={{ ...styles.td, textAlign: 'center' }}>אין היסטוריית תשלומים לנכס זה</td></tr>
             )}
           </tbody>
         </table>
@@ -311,31 +344,16 @@ export default function LandlordDashboard({ setScreen, user }) {
   if (view === "details") {
     return (
       <div style={styles.container}>
-        <button style={styles.backBtn} onClick={() => setView("main")}>
-          ⬅ חזרה לניהול נכסים
-        </button>
-
+        <button style={styles.backBtn} onClick={() => setView("main")}>⬅ חזרה לניהול נכסים</button>
         <h2 style={styles.title}>פרטי נכס: {selectedApt?.address}</h2>
-
         <div style={styles.pageContainer}>
           <p><strong>כתובת מלאה:</strong> {selectedApt?.address}</p>
           <p><strong>מחיר שכירות חודשי:</strong> {selectedApt?.rentAmount} ₪</p>
           <p><strong>סטטוס נוכחי:</strong> {isAptRented(selectedApt) ? "מושכרת" : "פנויה"}</p>
-
-          {isAptRented(selectedApt) && (
-            <p><strong>שם השוכר:</strong> {selectedApt?.tenant}</p>
-          )}
-
+          {isAptRented(selectedApt) && (<p><strong>שם השוכר:</strong> {selectedApt?.tenant}</p>)}
           <hr />
-
           <p><strong>תיאור הנכס:</strong></p>
-
-          <div style={{
-            backgroundColor: "#f9f9f9",
-            padding: "15px",
-            borderRadius: "4px",
-            border: "1px solid #eee"
-          }}>
+          <div style={{ backgroundColor: "#f9f9f9", padding: "15px", borderRadius: "4px", border: "1px solid #eee" }}>
             {selectedApt?.description || "אין תיאור זמין עבור נכס זה."}
           </div>
         </div>
@@ -347,25 +365,11 @@ export default function LandlordDashboard({ setScreen, user }) {
     return (
       <div style={styles.container}>
         <button style={styles.backBtn} onClick={() => setView("main")}>⬅ ביטול</button>
-
         <div style={{ ...styles.pageContainer, borderTop: `4px solid ${LOGO_GOLD}` }}>
           <h3>עדכון מחיר חשמל</h3>
           <p>מחיר נוכחי במערכת: {previousElectricityPrice} ₪ לקוט"ש</p>
-
-          <input
-            type="number"
-            step="0.01"
-            value={electricityPrice}
-            onChange={(e) => setElectricityPrice(e.target.value)}
-            style={styles.inputField}
-          />
-
-          <button
-            style={{ ...styles.btn, backgroundColor: "#2e7d32", color: "white" }}
-            onClick={updateElectricityPrice}
-          >
-            עדכן מחיר
-          </button>
+          <input type="number" step="0.01" value={electricityPrice} onChange={(e) => setElectricityPrice(e.target.value)} style={styles.inputField} />
+          <button style={{ ...styles.btn, backgroundColor: "#2e7d32", color: "white" }} onClick={updateElectricityPrice}>עדכן מחיר</button>
         </div>
       </div>
     );
@@ -375,37 +379,17 @@ export default function LandlordDashboard({ setScreen, user }) {
     return (
       <div style={styles.container}>
         <button style={styles.backBtn} onClick={() => setView("main")}>⬅ ביטול</button>
-
         <div style={{ ...styles.pageContainer, borderTop: `4px solid ${LOGO_BLUE}` }}>
-          <h3>פרטי חשבון בנק לקבלת תשלומים</h3>
-
+          <h3>עדכון פרטי קבלת תשלומים</h3>
           <label style={styles.label}>שם הבנק:</label>
-          <input
-            value={paymentDetails.bankName}
-            onChange={(e) => setPaymentDetails({ ...paymentDetails, bankName: e.target.value })}
-            style={styles.inputField}
-          />
-
+          <input value={paymentDetails.bankName} onChange={(e) => setPaymentDetails({ ...paymentDetails, bankName: e.target.value })} style={styles.inputField} />
           <label style={styles.label}>מספר סניף:</label>
-          <input
-            value={paymentDetails.bankBranch}
-            onChange={(e) => setPaymentDetails({ ...paymentDetails, bankBranch: e.target.value })}
-            style={styles.inputField}
-          />
-
+          <input value={paymentDetails.bankBranch} onChange={(e) => setPaymentDetails({ ...paymentDetails, bankBranch: e.target.value })} style={styles.inputField} />
           <label style={styles.label}>מספר חשבון:</label>
-          <input
-            value={paymentDetails.bankAccountNumber}
-            onChange={(e) => setPaymentDetails({ ...paymentDetails, bankAccountNumber: e.target.value })}
-            style={styles.inputField}
-          />
-
-          <button
-            style={{ ...styles.btn, backgroundColor: "#2e7d32", color: "white" }}
-            onClick={updatePaymentDetails}
-          >
-            שמור פרטים
-          </button>
+          <input value={paymentDetails.bankAccountNumber} onChange={(e) => setPaymentDetails({ ...paymentDetails, bankAccountNumber: e.target.value })} style={styles.inputField} />
+          <label style={styles.label}>מספר טלפון ל-Bit:</label>
+          <input value={paymentDetails.bitPhoneNumber} onChange={(e) => setPaymentDetails({ ...paymentDetails, bitPhoneNumber: e.target.value })} style={styles.inputField} placeholder="05x-xxxxxxx" />
+          <button style={{ ...styles.btn, backgroundColor: "#2e7d32", color: "white" }} onClick={updatePaymentDetails}>שמור פרטים</button>
         </div>
       </div>
     );
@@ -415,31 +399,31 @@ export default function LandlordDashboard({ setScreen, user }) {
     <div style={styles.container}>
       <h1 style={styles.title}>ניהול נכסים</h1>
 
+      {pendingPayments.length > 0 && (
+        <div style={{ marginBottom: "20px" }}>
+          <h3 style={{ color: "#d32f2f", marginBottom: "10px" }}> תשלומים הממתינים לאישורך:</h3>
+          {pendingPayments.map((pay) => (
+            <div key={pay.id} style={styles.alertBox}>
+              <div>
+                <strong>הדייר {pay.tenantUsername}</strong> דיווח על תשלום עבור הנכס <strong>{pay.address}</strong> בסך <strong>{pay.amount.toFixed(2)} ₪</strong>.
+              </div>
+              <button 
+                style={{ ...styles.btn, backgroundColor: "#2e7d32", color: "white", padding: "6px 12px", fontSize: "13px" }}
+                onClick={() => handleApprovePayment(pay.id)}
+              >
+                אישרתי קבלת תשלום 
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
       <div style={{ marginBottom: "25px", display: "flex", gap: "12px", flexWrap: "wrap" }}>
-        <button
-          style={{ ...styles.btn, backgroundColor: LOGO_BLUE, color: "white" }}
-          onClick={() => setScreen("addApartment")}
-        >
-          הוספת דירה
-        </button>
-
-        <button
-          style={{ ...styles.btn, backgroundColor: LOGO_BLUE, color: "white" }}
-          onClick={handleGoToElectricity}
-        >
-          עדכון חשמל
-        </button>
-
-        <button
-          style={{ ...styles.btn, backgroundColor: LOGO_BLUE, color: "white" }}
-          onClick={handleGoToPaymentDetails}
-        >
-          פרטי תשלום
-        </button>
+        <button style={{ ...styles.btn, backgroundColor: LOGO_BLUE, color: "white" }} onClick={() => setScreen("addApartment")}>הוספת דירה</button>
+        <button style={{ ...styles.btn, backgroundColor: LOGO_BLUE, color: "white" }} onClick={handleGoToElectricity}>עדכון חשמל</button>
+        <button style={{ ...styles.btn, backgroundColor: LOGO_BLUE, color: "white" }} onClick={handleGoToPaymentDetails}>פרטי תשלום</button>
       </div>
-
       <LandlordStatistics apartments={apartments} />
-
       <table style={styles.table}>
         <thead>
           <tr>
@@ -450,130 +434,46 @@ export default function LandlordDashboard({ setScreen, user }) {
             <th style={{ ...styles.th, width: "420px" }}>פעולות</th>
           </tr>
         </thead>
-
         <tbody>
           {apartments.map((apt) => {
             const rented = isAptRented(apt);
-
             return (
               <tr key={apt.id}>
                 <td style={styles.td}>{apt.address}</td>
                 <td style={styles.td}>{apt.rentAmount} ₪</td>
-
                 <td style={styles.td}>
-                  <span
-                    style={{
-                      ...styles.badge,
-                      backgroundColor: rented ? "#2e7d32" : LOGO_GOLD,
-                      color: rented ? "white" : "#222"
-                    }}
-                  >
+                  <span style={{ ...styles.badge, backgroundColor: rented ? "#2e7d32" : LOGO_GOLD, color: rented ? "white" : "#222" }}>
                     {rented ? "מושכרת" : "פנויה"}
                   </span>
                 </td>
-
                 <td style={styles.td}>
                   {rentingAptId === apt.id ? (
                     <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
-                      <input
-                        type="text"
-                        value={tenantNameInput}
-                        placeholder="שם שוכר"
-                        onChange={(e) => setTenantNameInput(e.target.value)}
-                        style={{ width: "90px", padding: "4px" }}
-                      />
-
-                      <button
-                        onClick={() => handleRentApartment(apt.id)}
-                        style={{
-                          cursor: 'pointer',
-                          backgroundColor: '#2e7d32',
-                          color: 'white',
-                          border: 'none',
-                          padding: '4px 8px',
-                          borderRadius: '3px',
-                          fontWeight: 'bold'
-                        }}
-                      >
-                        שמור
-                      </button>
-
-                      <button
-                        onClick={() => setRentingAptId(null)}
-                        style={{
-                          cursor: 'pointer',
-                          backgroundColor: '#757575',
-                          color: 'white',
-                          border: 'none',
-                          padding: '4px 8px',
-                          borderRadius: '3px',
-                          fontWeight: 'bold'
-                        }}
-                      >
-                        ביטול
-                      </button>
+                      <input type="email" value={tenantEmailInput} placeholder="אימייל השוכר" onChange={(e) => setTenantEmailInput(e.target.value)} style={{ width: "130px", padding: "4px" }} />
+                      <button onClick={() => handleRentApartment(apt.id)} style={{ cursor: 'pointer', backgroundColor: '#2e7d32', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '3px', fontWeight: 'bold' }}>שמור</button>
+                      <button onClick={() => { setRentingAptId(null); setTenantEmailInput(""); }} style={{ cursor: 'pointer', backgroundColor: '#757575', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '3px', fontWeight: 'bold' }}>ביטול</button>
                     </div>
                   ) : (
                     rented ? apt.tenant : "—"
                   )}
                 </td>
-
                 <td style={styles.td}>
-                  <button
-                    style={{ ...styles.actionBtn, backgroundColor: "#457b9d", color: "white" }}
-                    onClick={() => handleShowHistory(apt)}
-                  >
-                    היסטוריה
-                  </button>
-
-                  <button
-                    style={{ ...styles.actionBtn, backgroundColor: LOGO_BLUE, color: "white" }}
-                    onClick={() => handleShowDetails(apt)}
-                  >
-                    פרטים
-                  </button>
-
+                  <button style={{ ...styles.actionBtn, backgroundColor: "#457b9d", color: "white" }} onClick={() => handleShowHistory(apt)}>היסטוריה</button>
+                  <button style={{ ...styles.actionBtn, backgroundColor: LOGO_BLUE, color: "white" }} onClick={() => handleShowDetails(apt)}>פרטים</button>
                   {!rented ? (
-                    <button
-                      style={{ ...styles.actionBtn, backgroundColor: LOGO_GOLD, color: "#222" }}
-                      onClick={() => setRentingAptId(apt.id)}
-                    >
-                      שייך
-                    </button>
+                    <button style={{ ...styles.actionBtn, backgroundColor: LOGO_GOLD, color: "#222" }} onClick={() => setRentingAptId(apt.id)}>שייך</button>
                   ) : (
-                    <button
-                      style={{ ...styles.actionBtn, backgroundColor: LOGO_GOLD, color: "#222" }}
-                      onClick={() => handleVacateApartment(apt.id)}
-                    >
-                      פנה
-                    </button>
+                    <button style={{ ...styles.actionBtn, backgroundColor: LOGO_GOLD, color: "#222" }} onClick={() => handleVacateApartment(apt.id)}>פנה</button>
                   )}
-
-                  <button
-                    style={{ ...styles.actionBtn, backgroundColor: "#c62828", color: "white" }}
-                    onClick={() => {}}
-                  >
-                    מחק
-                  </button>
+                  <button style={{ ...styles.actionBtn, backgroundColor: "#c62828", color: "white" }} onClick={() => handleDeleteApartment(apt.id)}>מחק</button>
                 </td>
               </tr>
             );
           })}
         </tbody>
       </table>
-
       <div style={{ marginTop: "40px" }}>
-        <button
-          style={{
-            ...styles.btn,
-            backgroundColor: "#eceff1",
-            color: "#455a64",
-            border: "1px solid #cfd8dc"
-          }}
-          onClick={() => setScreen("login")}
-        >
-          התנתק מהמערכת
-        </button>
+        <button style={{ ...styles.btn, backgroundColor: "#eceff1", color: "#455a64", border: "1px solid #cfd8dc" }} onClick={() => setScreen("login")}>התנתק מהמערכת</button>
       </div>
     </div>
   );
