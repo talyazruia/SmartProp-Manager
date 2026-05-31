@@ -41,31 +41,39 @@ public class ElectricityService {
 
             // שליפת המשכיר המשויך לשוכר זה
             String landlordUsername = tenant.getLandlordId();
-            Optional<Landlord> landlordOptional = landlordRepository.findById(landlordUsername);
+            
+            if (landlordUsername != null) {
+                Optional<Landlord> landlordOptional = landlordRepository.findById(landlordUsername);
 
-            if (landlordOptional.isPresent()) {
-                Landlord landlord = landlordOptional.get();
+                if (landlordOptional.isPresent()) {
+                    Landlord landlord = landlordOptional.get();
 
-                if (updateRate) {
-                    // אם ביקשו לעדכן תעריף, נעדכן אותו אצל המשכיר
-                    landlord.setElectricityRate(rate);
-                    landlordRepository.save(landlord);
-                    rateToUse = rate;
-                } else {
-                    // אחרת נשתמש בתעריף ששמור אצל המשכיר
-                    rateToUse = landlord.getElectricityRate();
+                    if (updateRate) {
+                        // אם ביקשו לעדכן תעריף, נעדכן אותו אצל המשכיר
+                        landlord.setElectricityRate(rate);
+                        landlordRepository.save(landlord);
+                        rateToUse = rate;
+                    } else {
+                        // אחרת נשתמש בתעריף ששמור אצל המשכיר
+                        rateToUse = landlord.getElectricityRate();
 
-                    // הגנה למקרה שהתעריף עדיין לא הוגדר
-                    if (rateToUse <= 0) {
-                        rateToUse = 0.6;
+                        // הגנה למקרה שהתעריף עדיין לא הוגדר
+                        if (rateToUse <= 0) {
+                            rateToUse = 0.6;
+                        }
                     }
                 }
             }
         }
 
-        // 2. שליפת הקריאה האחרונה מה-DB לפי התשלום האחרון שנכנס
-        Payment lastPayment = paymentRepository.findFirstByTenantUsernameOrderByIdDesc(tenantUsername);
-        double previous = (lastPayment != null) ? lastPayment.getMeterReading() : 0;
+        // 2. תוקן: שליפת הקריאה האחרונה מה-DB לפי הנכס (propertyId) ולא לפי השוכר
+        double previous = 0;
+        if (propertyId != null) {
+            Payment lastPayment = paymentRepository.findFirstByPropertyIdOrderByIdDesc(propertyId);
+            if (lastPayment != null) {
+                previous = lastPayment.getMeterReading();
+            }
+        }
 
         // 3. חישוב צריכת החשמל
         double consumption = current - previous;
@@ -107,8 +115,12 @@ public class ElectricityService {
         );
     }
 
-    public double getPreviousReadingForTenant(String tenantUsername) {
-        Payment lastPayment = paymentRepository.findFirstByTenantUsernameOrderByIdDesc(tenantUsername);
+    // תוקן: פונקציית העזר עבור ה-Vision תלויה כעת ב-propertyId
+    public double getPreviousReadingForProperty(Long propertyId) {
+        if (propertyId == null) {
+            return 0;
+        }
+        Payment lastPayment = paymentRepository.findFirstByPropertyIdOrderByIdDesc(propertyId);
         return (lastPayment != null) ? lastPayment.getMeterReading() : 0;
     }
 }

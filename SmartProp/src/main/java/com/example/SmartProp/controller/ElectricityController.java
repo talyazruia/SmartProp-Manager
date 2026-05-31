@@ -54,7 +54,7 @@ public class ElectricityController {
 
 
     // ============================
-    // חישוב מתוך תמונה (עם התיקון העשרוני שלך)
+    // חישוב מתוך תמונה (מתוקן לשליפה לפי נכס)
     // ============================
     @PostMapping("/calculate-from-image")
     public String calculateFromImage(
@@ -65,8 +65,8 @@ public class ElectricityController {
             @RequestParam("image") MultipartFile imageFile) {
 
         try {
-            // שליפת הקריאה הקודמת לפי הלוגיקה שלך
-            double previousReading = electricityService.getPreviousReadingForTenant(username);
+            // תוקן: שליפת הקריאה הקודמת לפי מזהה הנכס במקום השוכר
+            double previousReading = electricityService.getPreviousReadingForProperty(propertyId);
 
             String base64Image = Base64.getEncoder().encodeToString(imageFile.getBytes());
 
@@ -95,7 +95,6 @@ public class ElectricityController {
     // ============================
     // ENDPOINTS לניהול מחיר החשמל לפי משכיר ספציפי
     // ============================
-
     @GetMapping("/price/{username}")
     public Map<String, Object> getElectricityPrice(@PathVariable String username) {
         Optional<Landlord> landlord = landlordRepository.findById(username);

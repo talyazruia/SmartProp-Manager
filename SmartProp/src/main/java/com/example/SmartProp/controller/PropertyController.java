@@ -2,8 +2,10 @@ package com.example.SmartProp.controller;
 
 import com.example.SmartProp.model.Property;
 import com.example.SmartProp.model.Tenant;
+import com.example.SmartProp.model.Payment;
 import com.example.SmartProp.repository.PropertyRepository;
 import com.example.SmartProp.repository.TenantRepository;
+import com.example.SmartProp.repository.PaymentRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -23,12 +25,38 @@ public class PropertyController {
     @Autowired
     private PropertyRepository propertyRepository;
 
-    // 1. הוספת דירה חדשה
+    @Autowired
+    private PaymentRepository paymentRepository;
+
+    // 1. הוספת דירה חדשה + קריאת מונה התחלתית (מאושרת אוטומטית)
     @PostMapping("/add")
-    public Map<String, String> addProperty(@RequestBody Property property) {
+    public Map<String, String> addProperty(@RequestBody Map<String, Object> payload) {
         try {
-            propertyRepository.save(property);
-            return Map.of("status", "success", "message", "הדירה נוספה בהצלחה");
+            // שמירת הדירה
+            Property property = new Property();
+            property.setAddress((String) payload.get("address"));
+            property.setDescription((String) payload.get("description"));
+            property.setRentAmount(Double.parseDouble(payload.get("rentAmount").toString()));
+            property.setLandlordUsername((String) payload.get("landlordUsername"));
+            
+            Property savedProperty = propertyRepository.save(property);
+
+            // שמירה בטבלת ה-payment עם אישור אוטומטי
+            if (payload.containsKey("initialMeterReading") && payload.get("initialMeterReading") != null) {
+                double initialReading = Double.parseDouble(payload.get("initialMeterReading").toString());
+                
+                Payment payment = new Payment();
+                payment.setPropertyId(savedProperty.getId()); 
+                payment.setMeterReading(initialReading);      
+                payment.setDate(new java.util.Date().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate()); 
+                
+                // כאן אנחנו מסמנים שהתשלום/קריאה מאושרים אוטומטית
+                payment.setApproved(true); 
+                
+                paymentRepository.save(payment);
+            }
+
+            return Map.of("status", "success", "message", "הדירה נוספה והקריאה אושרה בהצלחה");
         } catch (Exception e) {
             return Map.of("status", "error", "message", e.getMessage());
         }
@@ -46,26 +74,18 @@ public class PropertyController {
         return propertyRepository.findAll();
     }
 
-    // 4. עדכון דירה כללית
+    // 4. עדכון דירה
     @PutMapping("/update/{id}")
-    public Map<String, String> updateProperty(
-            @PathVariable Long id,
-            @RequestBody Property propertyDetails) {
-
+    public Map<String, String> updateProperty(@PathVariable Long id, @RequestBody Property propertyDetails) {
         Optional<Property> optionalProperty = propertyRepository.findById(id);
-
         if (optionalProperty.isPresent()) {
             Property property = optionalProperty.get();
-
             property.setAddress(propertyDetails.getAddress());
             property.setRentAmount(propertyDetails.getRentAmount());
             property.setLandlordUsername(propertyDetails.getLandlordUsername());
-
             propertyRepository.save(property);
-
             return Map.of("status", "success", "message", "עודכן בהצלחה");
         }
-
         return Map.of("status", "error", "message", "לא נמצא");
     }
 
@@ -83,70 +103,47 @@ public class PropertyController {
         }
     }
 
-    // ✅ 6. השכרת / פינוי דירה (חיפוש לפי שם מלא ועדכון דו-כיווני)
+    // 6. השכרת / פינוי דירה
     @PutMapping("/{id}/rent")
-    public Map<String, String> rentProperty(
-            @PathVariable Long id,
-            @RequestParam String tenantName) {
-
+    public Map<String, String> rentProperty(@PathVariable Long id, @RequestParam String tenantName) {
         try {
             Optional<Property> optionalProperty = propertyRepository.findById(id);
-
             if (optionalProperty.isPresent()) {
                 Property property = optionalProperty.get();
                 
-                // שלב א': ניקוי הדירה מהדייר הקודם (אם היה כזה)
                 if (property.getTenant() != null && !property.getTenant().isEmpty()) {
-                    // מפצלים את השם הישן כדי למצוא אותו בדאטאבייס ולנקות לו את ה-apartmentId
-                    String[] oldNameParts = property.getTenant().trim().split("\\s+", 2);
-                    if (oldNameParts.length == 2) {
-                        Optional<Tenant> oldTenantOpt = tenantRepository.findByFirstNameAndLastName(oldNameParts[0], oldNameParts[1]);
-                        if (oldTenantOpt.isPresent()) {
-                            Tenant oldTenant = oldTenantOpt.get();
-                            oldTenant.setApartmentId(null);
-                            tenantRepository.save(oldTenant);
-                        }
+                    String oldTenantEmail = property.getTenant().trim();
+                    Optional<Tenant> oldTenantOpt = tenantRepository.findById(oldTenantEmail);
+                    if (oldTenantOpt.isPresent()) {
+                        Tenant oldTenant = oldTenantOpt.get();
+                        oldTenant.setApartmentId(null);
+                        tenantRepository.save(oldTenant);
                     }
                 }
 
-                // מצב 1: בקשת פינוי דירה (tenantName מגיע ריק מה-Frontend)
                 if (tenantName == null || tenantName.trim().isEmpty()) {
                     property.setRented(false);
                     property.setTenant(null);
                     propertyRepository.save(property);
-                    return Map.of("status", "success", "message", "הדירה פונתה בהצלחה והדייר עודכן");
+                    return Map.of("status", "success", "message", "הדירה פונתה בהצלחה");
                 }
 
-                // מצב 2: שיוך שוכר חדש לדירה לפי שם מלא
-                String[] nameParts = tenantName.trim().split("\\s+", 2); // מפצל את "ישראל ישראל" לשני חלקים לפי הרווח
-                if (nameParts.length < 2) {
-                    return Map.of("status", "error", "message", "נא להזין שם מלא (שם פרטי ומשפחה) של השוכר");
-                }
-
-                String firstName = nameParts[0];
-                String lastName = nameParts[1];
-
-                Optional<Tenant> newTenantOpt = tenantRepository.findByFirstNameAndLastName(firstName, lastName);
+                String tenantEmail = tenantName.trim().toLowerCase();
+                Optional<Tenant> newTenantOpt = tenantRepository.findById(tenantEmail);
                 if (!newTenantOpt.isPresent()) {
-                    return Map.of("status", "error", "message", "השוכר '" + tenantName + "' לא נמצא במערכת");
+                    return Map.of("status", "error", "message", "השוכר לא נמצא במערכת");
                 }
 
                 Tenant newTenant = newTenantOpt.get();
-
-                // 1. עדכון טבלת הדירות (Properties) - שומרים את השם המלא בתור tenant
                 property.setRented(true);
-                property.setTenant(tenantName); 
+                property.setTenant(tenantEmail); 
                 propertyRepository.save(property);
-
-                // 2. עדכון טבלת השוכרים (Tenants)
-                newTenant.setApartmentId(id); // שמירת מזהה הדירה אצל הדייר
+                newTenant.setApartmentId(id);
                 tenantRepository.save(newTenant);
 
-                return Map.of("status", "success", "message", "הדירה והשוכר שויכו ועודכנו בהצלחה!");
+                return Map.of("status", "success", "message", "הדירה והשוכר שויכו בהצלחה!");
             }
-
             return Map.of("status", "error", "message", "לא נמצאה דירה");
-
         } catch (Exception e) {
             return Map.of("status", "error", "message", e.getMessage());
         }

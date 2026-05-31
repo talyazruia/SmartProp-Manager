@@ -14,9 +14,26 @@ public class LandlordController {
     @Autowired
     private LandlordRepository landlordRepository;
 
+    // שליפת פרטי בעל דירה לפי username
+    @GetMapping("/{username}")
+    public Landlord getLandlord(@PathVariable String username) {
+        return landlordRepository.findById(username).orElse(null);
+    }
+
+    // עדכון פרטי בנק וביט
+    @PutMapping("/{username}/payment-details")
+    public Landlord updatePaymentDetails(@PathVariable String username, @RequestBody Landlord details) {
+        return landlordRepository.findById(username).map(landlord -> {
+            landlord.setBankName(details.getBankName());
+            landlord.setBankBranch(details.getBankBranch());
+            landlord.setBankAccountNumber(details.getBankAccountNumber());
+            landlord.setBitPhoneNumber(details.getBitPhoneNumber()); // כאן העדכון של הביט
+            return landlordRepository.save(landlord);
+        }).orElseThrow(() -> new RuntimeException("Landlord not found"));
+    }
+
     @PostMapping
     public Landlord createLandlord(@RequestBody Landlord landlord) {
-        System.out.println(">>> Request received for username: " + landlord.getUsername());
         return landlordRepository.save(landlord);
     }
 
