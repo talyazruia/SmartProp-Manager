@@ -87,7 +87,7 @@ public class AuthController {
 
         return Map.of(
             "status", "error",
-            "message", "שם משתמש או סיסמה שגויים"
+            "message", "מייל או סיסמה שגויים"
         );
     }
 
@@ -102,7 +102,7 @@ public class AuthController {
 
             return Map.of(
                 "status", "error",
-                "message", "שם המשתמש כבר קיים"
+                "message", "מייל כבר קיים"
             );
         }
 
