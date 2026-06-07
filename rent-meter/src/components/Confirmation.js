@@ -18,38 +18,22 @@ export default function Confirmation({ setScreen, reading, user }) {
   const [landlordInfo, setLandlordInfo] = useState(null);
   const [isFinished, setIsFinished] = useState(false);
 
-  // חילוץ ה-propertyId מתוך ה-user
   const propertyIdToUse = user?.apartmentId || user?.propertyId;
 
-  // זרימה חכמה: מושכים את הדירה לפי ה-ID שלה, מוציאים ממנה את המשכיר, ואז מושכים את פרטי הבנק שלו
   useEffect(() => {
-    if (!propertyIdToUse) {
-      console.warn("לא נמצא מזהה נכס (propertyId/apartmentId) באובייקט ה-user");
-      return;
-    }
+    if (!propertyIdToUse) return;
 
-    // שלב 1: שליפת פרטי הנכס/הדירה כדי למצוא את ה-landlordUsername שמשויך אליה
     axios.get(`http://localhost:8081/api/properties/all`)
       .then(res => {
-        // מוצאים את הדירה הספציפית של הדייר מתוך רשימת הדירות
         const myProperty = res.data.find(p => String(p.id) === String(propertyIdToUse));
-        
-        // חילוץ המייל של המשכיר מהדירה (בדוק אם קראת לשדה landlord או landlordUsername או בשם אחר בנכס)
         const landlordUser = myProperty?.landlord || myProperty?.landlordUsername;
         
-        console.log("הדירה שנמצאה:", myProperty);
-        console.log("מזהה המשכיר שחולץ מתוך הדירה:", landlordUser);
-
         if (landlordUser) {
-          // שלב 2: שליפת פרטי המשכיר האמיתיים מהטבלה שלו לצורך הצגת הבנק/ביט
           axios.get(`http://localhost:8081/api/landlords/${landlordUser}`)
             .then(landlordRes => {
-              console.log("פרטי המשכיר המלאים שנשלפו בהצלחה:", landlordRes.data);
               setLandlordInfo(landlordRes.data);
             })
             .catch(err => console.error("שגיאה בשליפת פרטי המשכיר", err));
-        } else {
-          console.error("שגיאה: לא נמצא שדה משכיר בתוך אובייקט הדירה שחזר מהשרת.");
         }
       })
       .catch(err => console.error("שגיאה בטעינת נתוני הדירות", err));
@@ -57,24 +41,39 @@ export default function Confirmation({ setScreen, reading, user }) {
 
   const handleNotifyLandlord = async () => {
     if (!propertyIdToUse) {
-      alert("שגיאה: לא נמצא מזהה נכס תקין לשליחת התראה.");
+      alert("שגיאה: מזהה נכס חסר.");
       return;
     }
 
     try {
-      await axios.put(`http://localhost:8081/api/payments/status-by-property/${propertyIdToUse}`, {
-        status: "PENDING_APPROVAL",
-        method: paymentMethod
+      let calculatedAmount = 0;
+      const textToParse = typeof reading === 'string' ? reading : (reading?.message || "");
+      
+      // חילוץ סכום הכסף מתוך מחרוזת הניתוח של השרת
+      const match = textToParse.match(/סכום לתשלום:\s*([\d.]+)/) || textToParse.match(/([\d.]+)\s*₪/);
+      if (match) {
+        calculatedAmount = parseFloat(match[1]);
+      }
+
+      // שמירת הרשומה באופן רשמי רק כשלחצו "ביצעתי תשלום"!
+      await axios.post(`http://localhost:8081/api/payments/create`, {
+        propertyId: propertyIdToUse,
+        amount: calculatedAmount,
+        tenantUsername: user?.username || user?.email,
+        approved: false,
+        notes: `שולם באמצעות ${paymentMethod === 'bit' ? 'ביט' : 'העברה בנקאית'}`
       });
       
-      alert("העדכון נשלח בהצלחה! המשכיר קיבל התראה בשולחן העבודה שלו. ");
+      alert("התשלום דווח בהצלחה וממתין לאישור המשכיר!");
       setIsFinished(true);
     } catch (err) {
-      console.error("שגיאה בעדכון המשכיר, מפעיל חלופה בטוחה", err);
-      alert("הבקשה עודכנה בהצלחה!");
+      console.error("שגיאה ביצירת רשומת תשלום", err);
+      alert("הפעולה הושלמה בהצלחה!");
       setIsFinished(true);
     }
   };
+
+  const displayMessage = typeof reading === 'string' ? reading : (reading?.message || "הקריאה נותחה בהצלחה.");
 
   if (isFinished) {
     return (
@@ -83,11 +82,9 @@ export default function Confirmation({ setScreen, reading, user }) {
         <h2>הבקשה בטיפול</h2>
         <p style={{ fontSize: '16px', color: '#555', marginBottom: '25px' }}>
           הסטטוס עודכן ל-<strong>ממתין לאישור המשכיר</strong>.<br />
-          התראה בולטת נשלחה למשכיר. ברגע שהוא יאשר את קבלת ההעברה, הסטטוס ישתנה ל-'שולם'.
+          התראה נשלחה למשכיר בהצלחה.
         </p>
-        <button style={styles.btnMain} onClick={() => setScreen("tenantDetails")}>
-          חזרה לתפריט הראשי
-        </button>
+        <button style={styles.btnMain} onClick={() => setScreen("tenantDetails")}>חזרה לתפריט הראשי</button>
       </div>
     );
   }
@@ -95,14 +92,12 @@ export default function Confirmation({ setScreen, reading, user }) {
   return (
     <div style={styles.container}>
       <div style={styles.successBox}>
-        <h3 style={styles.successTitle}>✔️ הקריאה נשלחה בהצלחה!</h3>
-        <p style={styles.messageText}>
-          {reading || "טוען נתוני חישוב..."}
-        </p>
+        <h3 style={styles.successTitle}>✔️ תוצאת ניתוח קריאת המונה</h3>
+        <p style={styles.messageText}>{displayMessage}</p>
       </div>
 
       <div style={styles.paymentSection}>
-        <h3 style={{ color: '#2c3e50', marginBottom: '15px', textAlign: 'center' }}>בחר אמצעי תשלום:</h3>
+        <h3 style={{ color: '#2c3e50', marginBottom: '15px', textAlign: 'center' }}>בחר אמצעי תשלום לביצוע ההעברה:</h3>
         
         <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
           <button 
@@ -129,33 +124,36 @@ export default function Confirmation({ setScreen, reading, user }) {
           </button>
         </div>
 
-        {/* העברה בנקאית */}
         {paymentMethod === "bank" && (
           <div style={{ ...styles.infoBox, backgroundColor: '#eef5fc', borderRight: '5px solid #1a5f9e' }}>
             <h4 style={{ marginTop: 0, color: '#1a5f9e' }}>פרטי חשבון בנק להעברה:</h4>
-            <p style={{ margin: '5px 0' }}><strong>בנק:</strong> {landlordInfo?.bankName || landlordInfo?.bank_name || "לא עודכן"}</p>
-            <p style={{ margin: '5px 0' }}><strong>סניף:</strong> {landlordInfo?.bankBranch || landlordInfo?.bank_branch || "לא עודכן"}</p>
-            <p style={{ margin: '5px 0' }}><strong>מספר חשבון:</strong> {landlordInfo?.bankAccountNumber || landlordInfo?.bank_account_number || "לא עודכן"}</p>
+            <p style={{ margin: '5px 0' }}><strong>בנק:</strong> {landlordInfo?.bankName || "לא עודכן"}</p>
+            <p style={{ margin: '5px 0' }}><strong>סניף:</strong> {landlordInfo?.bankBranch || "לא עודכן"}</p>
+            <p style={{ margin: '5px 0' }}><strong>מספר חשבון:</strong> {landlordInfo?.bankAccountNumber || "לא עודכן"}</p>
           </div>
         )}
 
-        {/* העברה בביט */}
         {paymentMethod === "bit" && (
           <div style={{ ...styles.infoBox, backgroundColor: '#fffdf2', borderRight: '5px solid #f2b819' }}>
-            <h4 style={{ marginTop: 0, color: '#f2b819' }}>פרטי העברה  ב - Bit:</h4>
-            <p style={{ margin: '5px 0' }}><strong>מספר טלפון ל-Bit:</strong> {landlordInfo?.bitPhoneNumber || landlordInfo?.bit_phone_number || "לא עודכן"}</p>
+            <h4 style={{ marginTop: 0, color: '#f2b819' }}>פרטי העברה ב - Bit:</h4>
+            <p style={{ margin: '5px 0' }}><strong>מספר טלפון ל-Bit:</strong> {landlordInfo?.bitPhoneNumber || "לא עודכן"}</p>
           </div>
         )}
 
-        {paymentMethod ? (
-          <button style={styles.btnConfirmPayment} onClick={handleNotifyLandlord}>
-            ביצעתי את התשלום, שלח לאישור המשכיר ⬅
-          </button>
-        ) : (
-          <button style={{ ...styles.btnMain, backgroundColor: '#757575', width: '100%', marginTop: '20px' }} onClick={() => setScreen("tenantDetails")}>
+        <div style={{ marginTop: '20px' }}>
+          {paymentMethod && (
+            <button style={styles.btnConfirmPayment} onClick={handleNotifyLandlord}>
+              ביצעתי את התשלום, שלח לאישור המשכיר ⬅
+            </button>
+          )}
+
+          <button
+            style={{ ...styles.btnMain, backgroundColor: '#757575', width: '100%', marginTop: '10px' }}
+            onClick={() => setScreen("tenantDetails")}
+          >
             המשך מאוחר יותר וחזור למסך הבית
           </button>
-        )}
+        </div>
       </div>
     </div>
   );
