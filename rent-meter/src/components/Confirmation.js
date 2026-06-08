@@ -47,29 +47,44 @@ export default function Confirmation({ setScreen, reading, user }) {
 
     try {
       let calculatedAmount = 0;
+      let currentReading = 0;
+      let consumption = 0;
+
       const textToParse = typeof reading === 'string' ? reading : (reading?.message || "");
       
-      // חילוץ סכום הכסף מתוך מחרוזת הניתוח של השרת
-      const match = textToParse.match(/סכום לתשלום:\s*([\d.]+)/) || textToParse.match(/([\d.]+)\s*₪/);
-      if (match) {
-        calculatedAmount = parseFloat(match[1]);
+      // 1. חילוץ סכום הכסף מתוך מחרוזת הניתוח
+      const amountMatch = textToParse.match(/סכום לתשלום:\s*([\d.]+)/) || textToParse.match(/([\d.]+)\s*₪/);
+      if (amountMatch) {
+        calculatedAmount = parseFloat(amountMatch[1]);
       }
 
-      // שמירת הרשומה באופן רשמי רק כשלחצו "ביצעתי תשלום"!
+      // 2. חילוץ הקריאה הנוכחית של המונה
+      const readingMatch = textToParse.match(/קריאה נוכחית:\s*([\d.]+)/);
+      if (readingMatch) {
+        currentReading = parseFloat(readingMatch[1]);
+      }
+
+      // 3. חילוץ הצריכה בקוט"ש
+      const consumptionMatch = textToParse.match(/צריכה:\s*([\d.]+)\s*קו"ש/);
+      if (consumptionMatch) {
+        consumption = parseFloat(consumptionMatch[1]);
+      }
+
+      // כאן בוצע התיקון הקריטי: שמות השדות הותאמו בדיוק ל-Entity ב-Java!
       await axios.post(`http://localhost:8081/api/payments/create`, {
         propertyId: propertyIdToUse,
         amount: calculatedAmount,
         tenantUsername: user?.username || user?.email,
         approved: false,
-        notes: `שולם באמצעות ${paymentMethod === 'bit' ? 'ביט' : 'העברה בנקאית'}`
+        meterReading: currentReading,     // תוקן מ-currentReading ל-meterReading
+        consumptionKwh: consumption      // תוקן מ-kwh ל-consumptionKwh
       });
       
       alert("התשלום דווח בהצלחה וממתין לאישור המשכיר!");
       setIsFinished(true);
     } catch (err) {
       console.error("שגיאה ביצירת רשומת תשלום", err);
-      alert("הפעולה הושלמה בהצלחה!");
-      setIsFinished(true);
+      alert("אירעה שגיאה בשמירת נתוני התשלום. וודא שצד השרת פעיל.");
     }
   };
 
@@ -82,7 +97,7 @@ export default function Confirmation({ setScreen, reading, user }) {
         <h2>הבקשה בטיפול</h2>
         <p style={{ fontSize: '16px', color: '#555', marginBottom: '25px' }}>
           הסטטוס עודכן ל-<strong>ממתין לאישור המשכיר</strong>.<br />
-          התראה נשלחה למשכיר בהצלחה.
+          התראה נשלחה למשכיר בהצלחה. ברגע שהוא יאשר את קבלת הכסף, הסטטוס ישתנה ל-'שולם'.
         </p>
         <button style={styles.btnMain} onClick={() => setScreen("tenantDetails")}>חזרה לתפריט הראשי</button>
       </div>
