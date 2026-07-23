@@ -1,6 +1,6 @@
 # SmartProp Manager
 
-SmartProp Manager is a full-stack property management application for landlords and tenants.
+SmartProp Manager is a full stack property management application for landlords and tenants.
 
 The system helps landlords manage rental apartments and helps tenants track electricity meter readings, monthly utility payments, payment history, and consumption statistics.
 
@@ -13,22 +13,7 @@ Because of that, running the full version locally requires private credentials t
 
 For reviewers, the recommended way to understand the product is through the project flow, code structure, and demo assets.
 
-> Demo video: add link here  
-> Screenshots: add screenshots here or place them under `docs/screenshots/`
-
-Suggested demo flow:
-- Tenant login and assigned apartment view
-- Electricity meter image upload
-- Automatic meter reading extraction using Google Vision API
-- Electricity usage and payment calculation
-- Tenant payment history and charts
-- Landlord apartment dashboard
-- Pending payment approval by the landlord
-- Landlord statistics and Excel export
-
----
-
-## Main Features
+> Demo video: https://drive.google.com/file/d/1_JmTgizIruw3oaLow01L87LbCYV0IlXV/view?usp=sharing
 
 ### Tenant Side
 - View apartments assigned to the tenant
