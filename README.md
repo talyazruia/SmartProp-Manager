@@ -13,7 +13,8 @@ Because of that, running the full version locally requires private credentials t
 
 For reviewers, the recommended way to understand the product is through the project flow, code structure, and demo assets.
 
-> Demo video: https://drive.google.com/file/d/1_JmTgizIruw3oaLow01L87LbCYV0IlXV/view?usp=sharing
+> Demo video:
+ https://drive.google.com/file/d/1_JmTgizIruw3oaLow01L87LbCYV0IlXV/view?usp=sharing
 
 ### Tenant Side
 - View apartments assigned to the tenant
@@ -33,6 +34,29 @@ For reviewers, the recommended way to understand the product is through the proj
 - Review and approve pending tenant payments
 - View dashboard statistics and apartment-level payment history
 - Export payment reports to Excel
+
+## How the System Works
+
+### Tenant Flow
+
+1. The tenant logs into the system.
+2. The tenant selects an assigned apartment.
+3. The tenant submits an electricity meter reading.
+4. The reading can be entered manually or extracted from an uploaded image using Google Vision API OCR.
+5. The backend calculates electricity consumption based on the previous and current meter readings.
+6. The system calculates the payment amount according to the configured electricity rate.
+7. The payment is saved as pending.
+8. The landlord reviews and approves the payment.
+9. The tenant can view the updated payment status and payment history.
+
+### Landlord Flow
+
+1. The landlord logs into the system.
+2. The landlord manages apartments and tenant assignments.
+3. The landlord configures the electricity price per kWh.
+4. The landlord reviews pending payments.
+5. The landlord approves tenant payments.
+6. The landlord can view statistics and payment reports.
 
 ### Electricity & Payment Flow
 - Meter readings can be submitted manually or extracted from an uploaded image using Google Vision API OCR
@@ -142,7 +166,6 @@ Running the full project locally is optional and requires private configuration.
 
 ### Backend Requirements
 - Java 17
-- Maven
 - MySQL
 - Google Vision API key
 
@@ -150,12 +173,33 @@ Running the full project locally is optional and requires private configuration.
 - Node.js
 - npm
 
+### Backend Configuration
+
+Before running the backend, configure the following:
+
+1. Make sure MySQL is installed on the machine.
+2. The application connects to MySQL on port `3306`.
+3. The database name is `smartprop_db`. The database is created automatically if it does not already exist.
+4. Configure the MySQL username and password in `application.properties`.
+5. The Google Vision API key must be configured in `application.properties`:
+
+```properties
+google.api.key=YOUR_API_KEY
+```
+
+For project evaluation, the required Google Vision API credentials can be provided separately by the project author.
+
+The configuration file is located at:
+
+```text
+backend/SmartProp/src/main/resources/application.properties
+```
+
 ### Run Backend
 
-```bash
-cd backend/SmartProp
-mvn spring-boot:run
-```
+1. Open the `backend/SmartProp` folder in VS Code.
+2. Open the `SmartPropApplication` main class.
+3. Click **Run** in VS Code.
 
 Backend local URL:
 
@@ -164,6 +208,8 @@ http://localhost:8081
 ```
 
 ### Run Frontend
+
+Open a new terminal in VS Code:
 
 ```bash
 cd frontend/rent-meter
@@ -177,9 +223,7 @@ Frontend local URL:
 http://localhost:3000
 ```
 
-Frontend dependencies such as React, Axios, Material UI, Chart.js, Formik, Yup, and XLSX are installed automatically using `npm install`.
-
----
+The backend should be running before starting the frontend because the frontend communicates with the backend through the local API.
 
 ## Development Notes
 
